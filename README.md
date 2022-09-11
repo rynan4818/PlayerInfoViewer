@@ -16,6 +16,8 @@
 2. [リリースページ](https://github.com/rynan4818/PlayerInfoViewer/releases)から最新のPlayerInfoViewerのリリースをダウンロードします。
 3. ダウンロードしたzipファイルを`Beat Saber`フォルダに解凍して、`Plugin`フォルダに`PlayerInfoViewer.dll`ファイルをコピーします。
 
+※デフォルトではAM3時に日付が変更されます。深夜帯にプレイする方は、下記の設定値を調整して下さい。
+
 # 設定について
 `Beat Saber\UserData`フォルダの`PlayerInfoViewer.json`が設定ファイルです。
 
@@ -23,3 +25,5 @@
 |------|--------------|------|
 | DateChangeTime | 3 | 日付が変更される時刻(hour)です。3 → AM3時 |
 | IntervalTime | 3 | 前回プレイ時刻から、この時間経過しないと日付が更新されません。 3 → 3時間以上経過 |
+
+そのうちゲーム内から変更できるようにします。
