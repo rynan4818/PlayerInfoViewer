@@ -44,6 +44,14 @@ namespace PlayerInfoViewer.Models
             var response = await httpClient.GetAsync(playerFullInfoURL);
             var resJsonString = await response.Content.ReadAsStringAsync();
             _playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
+            if (PluginConfig.Instance.BeforePP == 0)
+            {
+                PluginConfig.Instance.BeforePP = _playerFullInfo.pp;
+                PluginConfig.Instance.NowPP = _playerFullInfo.pp;
+            }
+            if (PluginConfig.Instance.NowPP != _playerFullInfo.pp)
+                PluginConfig.Instance.BeforePP = PluginConfig.Instance.NowPP;
+            PluginConfig.Instance.NowPP = _playerFullInfo.pp;
             _playerInfoGetActive = false;
         }
         public void LastPlayerInfoUpdate()
@@ -69,6 +77,8 @@ namespace PlayerInfoViewer.Models
                 PluginConfig.Instance.LastTotalPlayCount = _playerFullInfo.scoreStats.totalPlayCount;
                 PluginConfig.Instance.LastRankedPlayCount = _playerFullInfo.scoreStats.rankedPlayCount;
                 PluginConfig.Instance.LastReplaysWatched = _playerFullInfo.scoreStats.replaysWatched;
+                PluginConfig.Instance.BeforePP = _playerFullInfo.pp;
+                PluginConfig.Instance.NowPP = _playerFullInfo.pp;
             }
             PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
         }

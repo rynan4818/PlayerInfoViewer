@@ -21,6 +21,8 @@ namespace PlayerInfoViewer.Configuration
         public virtual int LastTotalPlayCount { get; set; } = 0;
         public virtual int LastRankedPlayCount { get; set; } = 0;
         public virtual int LastReplaysWatched { get; set; } = 0;
+        public virtual float BeforePP { get; set; } = 0;
+        public virtual float NowPP { get; set; } = 0;
         /// <summary>
         /// これは、BSIPAが設定ファイルを読み込むたびに（ファイルの変更が検出されたときを含めて）呼び出されます。
         /// </summary>
