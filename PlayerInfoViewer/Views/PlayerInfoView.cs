@@ -120,8 +120,8 @@ namespace PlayerInfoViewer.Views
             var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - PluginConfig.Instance.LastRankedPlayCount);
             var todayRankUp = String.Format("{0:+#;-#;+0}", PluginConfig.Instance.LastRank - rank);
             var todayLocalRankUp = String.Format("{0:+#;-#;#}", PluginConfig.Instance.LastCountryRank - localRank);
-            var todayPpUp = String.Format("{0:+#.##;-#.##;+0.##}", Math.Round(pp - PluginConfig.Instance.LastPP, 2, MidpointRounding.AwayFromZero));
-            var lastChangePp = String.Format("{0:+#.##;-#.##;+0.##}", Math.Round(PluginConfig.Instance.NowPP - PluginConfig.Instance.BeforePP, 2, MidpointRounding.AwayFromZero));
+            var todayPpUp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(pp - PluginConfig.Instance.LastPP, 2, MidpointRounding.AwayFromZero));
+            var lastChangePp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(PluginConfig.Instance.NowPP - PluginConfig.Instance.BeforePP, 2, MidpointRounding.AwayFromZero));
             this._playCount.text = $"Total Play Count : {playCount} {todayPlayCount}    Ranked Play Count : {rankedPlayCount} {todayRankedPlayCount}";
             this._rankPP.text = $"Global : {todayRankUp}    Local : #{localRank} {todayLocalRankUp}    Today : {todayPpUp}pp  Last : {lastChangePp}pp";
         }
