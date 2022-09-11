@@ -1,6 +1,8 @@
 ﻿using HMUI;
 using LeaderboardCore.Interfaces;
+using PlayerInfoViewer.Configuration;
 using PlayerInfoViewer.Models;
+using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -20,6 +22,7 @@ namespace PlayerInfoViewer.Views
         private Canvas _canvas;
         private CurvedCanvasSettings _curvedCanvasSettings;
         private CurvedTextMeshPro _playCount;
+        private CurvedTextMeshPro _rankPP;
         private PlayerDataManager _playerDataManager;
 
         private static readonly Vector2 CanvasSize = new Vector2(100, 50);
@@ -57,6 +60,14 @@ namespace PlayerInfoViewer.Views
             this._playCount.fontSize = 14;
             this._playCount.color = Color.white;
             this._playCount.text = "PlayCountViewer: Load data...";
+            this._rankPP = this.CreateText(this._canvas.transform as RectTransform, string.Empty, new Vector2(10, 31));
+            rectTransform = this._rankPP.transform as RectTransform;
+            rectTransform.SetParent(this._canvas.transform, false);
+            rectTransform.anchoredPosition = Vector2.zero;
+            rectTransform.localPosition = new Vector3(0, 0.3f ,0);
+            this._rankPP.fontSize = 14;
+            this._rankPP.color = Color.white;
+            this._rankPP.text = "";
             this._platformLeaderboardViewController.didActivateEvent += OnLeaderboardActivated;
             this._platformLeaderboardViewController.didDeactivateEvent += OnLeaderboardDeactivated;
             this._playerDataManager.OnPlayCountChange += OnPlayCountChange;
@@ -101,7 +112,17 @@ namespace PlayerInfoViewer.Views
             if (this._playerDataManager._playerFullInfo == null)
                 return;
             var playCount = this._playerDataManager._playerFullInfo.scoreStats.totalPlayCount;
-            this._playCount.text = $"Play Count:{playCount}";
+            var rankedPlayCount = this._playerDataManager._playerFullInfo.scoreStats.rankedPlayCount;
+            var pp = this._playerDataManager._playerFullInfo.pp;
+            var localRank = this._playerDataManager._playerFullInfo.countryRank;
+            var rank = this._playerDataManager._playerFullInfo.rank;
+            var todayPlayCount = String.Format("{0:+#;-#;#}", playCount - PluginConfig.Instance.LastTotalPlayCount);
+            var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - PluginConfig.Instance.LastRankedPlayCount);
+            var todayRankUp = String.Format("{0:+#;-#;#}", PluginConfig.Instance.LastRank - rank);
+            var todayLocalRankUp = String.Format("{0:+#;-#;#}", PluginConfig.Instance.LastCountryRank - localRank);
+            var todayPpUp = String.Format("{0:+#.##;-#.##;#.##}", Math.Round(pp - PluginConfig.Instance.LastPP, 2, MidpointRounding.AwayFromZero));
+            this._playCount.text = $"Total Play Count : {playCount} {todayPlayCount}    Ranked Play Count : {rankedPlayCount} {todayRankedPlayCount}";
+            this._rankPP.text = $"Global : {todayRankUp}    Local : #{localRank} {todayLocalRankUp}    PP : {todayPpUp}";
         }
         public void OnLeaderboardActivated(bool firstactivation, bool addedtohierarchy, bool screensystemenabling)
         {

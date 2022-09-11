@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using IPA.Config.Stores;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
@@ -9,9 +8,10 @@ namespace PlayerInfoViewer.Configuration
     {
         public static PluginConfig Instance { get; set; }
         // BSIPAが値の変更を検出し、自動的に設定を保存したい場合は、'virtual'でなければなりません。
-        public virtual string LastPlayTime { get; set; } = DateTime.Now.ToString();
-        public virtual int DateChangeTime { get; set; } = 3;
-        public virtual int IntervalTime { get; set; } = 3;
+        public virtual string LastPlayTime { get; set; } = null; //最後に起動した時間
+        public virtual int DateChangeTime { get; set; } = 3;     //日付変更する時刻(24時間表記)
+        public virtual int IntervalTime { get; set; } = 3;       //日付変更に必要なインターバル時間
+        public virtual string LastGetTime { get; set; } = null;  //前回記録の取得時間
         public virtual float LastPP { get; set; } = 0;
         public virtual int LastRank { get; set; } = 0;
         public virtual int LastCountryRank { get; set; } = 0;
@@ -20,7 +20,7 @@ namespace PlayerInfoViewer.Configuration
         public virtual float LastAverageRankedAccuracy { get; set; } = 0;
         public virtual int LastTotalPlayCount { get; set; } = 0;
         public virtual int LastRankedPlayCount { get; set; } = 0;
-        public virtual int lastReplaysWatched { get; set; } = 0;
+        public virtual int LastReplaysWatched { get; set; } = 0;
         /// <summary>
         /// これは、BSIPAが設定ファイルを読み込むたびに（ファイルの変更が検出されたときを含めて）呼び出されます。
         /// </summary>

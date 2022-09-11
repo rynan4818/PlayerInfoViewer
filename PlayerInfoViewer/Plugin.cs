@@ -1,8 +1,10 @@
 ﻿using PlayerInfoViewer.Installers;
+using PlayerInfoViewer.Configuration;
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using SiraUtil.Zenject;
+using System;
 using IPALogger = IPA.Logging.Logger;
 
 namespace PlayerInfoViewer
@@ -25,7 +27,7 @@ namespace PlayerInfoViewer
             Instance = this;
             Log = logger;
             Log.Debug("Initialized.");
-            Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
+            PluginConfig.Instance = conf.Generated<PluginConfig>();
             zenjector.Install<PlayerInfoAppInstaller>(Location.App);
             zenjector.Install<PlayerInfoMenuInstaller>(Location.Menu);
         }
@@ -39,6 +41,7 @@ namespace PlayerInfoViewer
         [OnExit]
         public void OnApplicationQuit()
         {
+            PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
             Log.Debug("OnApplicationQuit");
         }
     }
