@@ -10,6 +10,7 @@ namespace PlayerInfoViewer.Models
     public class PlayerDataManager : IInitializable
     {
         private readonly IPlatformUserModel _userModel;
+        public static readonly HttpClient HttpClient = new HttpClient();
         public bool _playerInfoGetActive = false;
         public string _userID;
         public PlayerFullInfoJson _playerFullInfo;
@@ -40,8 +41,7 @@ namespace PlayerInfoViewer.Models
                 return;
             _playerInfoGetActive = true;
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
-            var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(playerFullInfoURL);
+            var response = await HttpClient.GetAsync(playerFullInfoURL);
             var resJsonString = await response.Content.ReadAsStringAsync();
             _playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
             if (PluginConfig.Instance.BeforePP == 0)
