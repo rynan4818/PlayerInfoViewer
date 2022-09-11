@@ -3,7 +3,7 @@
 このBeatSaberプラグインは、ScoreSaberのプレイヤー情報のうちScoreSaber modで表示されない項目を追加表示します。
 また、ランクアップした順位や、増加したプレイカウント、増えたppなど当日に変化のあった差分も表示します。
 
-![image](https://user-images.githubusercontent.com/14249877/189528035-bb499b8e-f5d3-4b56-ac56-00c6328a81c9.png)
+![image](https://user-images.githubusercontent.com/14249877/189532098-d18e19f2-f866-429d-b0b8-40421dd5586c.png)
 
 表示内容は今後拡張していくつもりです。
 
