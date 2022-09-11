@@ -5,6 +5,12 @@
 
 ![image](https://user-images.githubusercontent.com/14249877/189528035-bb499b8e-f5d3-4b56-ac56-00c6328a81c9.png)
 
+表示内容は今後拡張していくつもりです。
+
+私の[ScoreSaberRanking](https://github.com/rynan4818/ScoreSaberRanking)のランク情報とかも表示できるようにするつもりです。
+
+あと、表示がテキトーなので、もっとカッコよく表示したい。
+
 # インストール方法
 1. [LeaderboardCore](https://github.com/rithik-b/LeaderboardCore)に依存するので、Mod Assistantでインストールして下さい。[BeatLeader](https://github.com/BeatLeader/beatleader-mod) modをインストールしている人は既に導入されています。
 2. [リリースページ](https://github.com/rynan4818/PlayerInfoViewer/releases)から最新のPlayerInfoViewerのリリースをダウンロードします。
