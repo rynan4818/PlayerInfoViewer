@@ -35,6 +35,7 @@ namespace PlayerInfoViewer.Models
             if (_userID == null || _playerInfoGetActive)
                 return;
             _playerInfoGetActive = true;
+            _playerFullInfo = null;
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
             HttpResponseMessage response;
             try

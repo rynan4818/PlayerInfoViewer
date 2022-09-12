@@ -112,7 +112,16 @@ namespace PlayerInfoViewer.Views
         public void OnPlayCountChange()
         {
             if (this._playerDataManager._playerFullInfo == null)
+            {
+                this._playCount.text += " ScoreSaber Error!";
+                this._playCount.color = Color.red;
+                this._rankPP.color = Color.red;
                 return;
+            } else
+            {
+                this._playCount.color = Color.white;
+                this._rankPP.color = Color.white;
+            }
             var playCount = this._playerDataManager._playerFullInfo.scoreStats.totalPlayCount;
             var rankedPlayCount = this._playerDataManager._playerFullInfo.scoreStats.rankedPlayCount;
             var pp = this._playerDataManager._playerFullInfo.pp;
