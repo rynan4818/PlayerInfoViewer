@@ -23,16 +23,11 @@ namespace PlayerInfoViewer.Models
 
         public async void Initialize()
         {
+            Plugin.Log.Debug("PlayerDataManager Initialize");
             var userInfo = await _userModel.GetUserInfo();
             _userID = userInfo.platformUserId;
             await GetPlayerFullInfo();
             LastPlayerInfoUpdate();
-            OnPlayCountChange?.Invoke();
-        }
-        public void PlayerInfoCheck()
-        {
-            if (_playerFullInfo == null || _playerInfoGetActive)
-                return;
             OnPlayCountChange?.Invoke();
         }
         public async Task GetPlayerFullInfo()
@@ -41,7 +36,29 @@ namespace PlayerInfoViewer.Models
                 return;
             _playerInfoGetActive = true;
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
-            var response = await HttpClient.GetAsync(playerFullInfoURL);
+            HttpResponseMessage response;
+            try
+            {
+                response = await HttpClient.GetAsync(playerFullInfoURL);
+            }
+            catch (HttpRequestException)
+            {
+                Plugin.Log.Error("ScoreSaber Http Error");
+                _playerInfoGetActive = false;
+                return;
+            }
+            catch (TaskCanceledException)
+            {
+                Plugin.Log.Error("ScoreSaber Http Cancel");
+                _playerInfoGetActive = false;
+                return;
+            }
+            catch (Exception)
+            {
+                Plugin.Log.Error("ScoreSaber Other Error");
+                _playerInfoGetActive = false;
+                return;
+            }
             var resJsonString = await response.Content.ReadAsStringAsync();
             _playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
             if (PluginConfig.Instance.BeforePP == 0)

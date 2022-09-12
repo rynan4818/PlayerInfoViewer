@@ -39,6 +39,7 @@ namespace PlayerInfoViewer.Views
         }
         private void Awake()
         {
+            Plugin.Log.Debug("PlayerInfoView Awake");
             this.rootObject = new GameObject("PlayCount Canvas", typeof(Canvas), typeof(CurvedCanvasSettings), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             var sizeFitter = this.rootObject.GetComponent<ContentSizeFitter>();
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -71,11 +72,12 @@ namespace PlayerInfoViewer.Views
             this._platformLeaderboardViewController.didActivateEvent += OnLeaderboardActivated;
             this._platformLeaderboardViewController.didDeactivateEvent += OnLeaderboardDeactivated;
             this._playerDataManager.OnPlayCountChange += OnPlayCountChange;
-            this._playerDataManager.PlayerInfoCheck();
+            OnPlayCountChange();
             rootObject.SetActive(false);
         }
         private void OnDestroy()
         {
+            Plugin.Log.Debug("PlayerInfoView Destroy");
             this._playerDataManager.OnPlayCountChange -= OnPlayCountChange;
             this._platformLeaderboardViewController.didDeactivateEvent -= OnLeaderboardDeactivated;
             this._platformLeaderboardViewController.didActivateEvent -= OnLeaderboardActivated;
