@@ -3,8 +3,6 @@ using LeaderboardCore.Interfaces;
 using PlayerInfoViewer.Configuration;
 using PlayerInfoViewer.Models;
 using System;
-using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -20,7 +18,6 @@ namespace PlayerInfoViewer.Views
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
         private GameObject rootObject;
         private Canvas _canvas;
-        private CurvedCanvasSettings _curvedCanvasSettings;
         private CurvedTextMeshPro _playCount;
         private CurvedTextMeshPro _rankPP;
         private PlayerDataManager _playerDataManager;
@@ -40,14 +37,12 @@ namespace PlayerInfoViewer.Views
         private void Awake()
         {
             Plugin.Log.Debug("PlayerInfoView Awake");
-            this.rootObject = new GameObject("PlayCount Canvas", typeof(Canvas), typeof(CurvedCanvasSettings), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            this.rootObject = new GameObject("PlayCount Canvas", typeof(Canvas), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             var sizeFitter = this.rootObject.GetComponent<ContentSizeFitter>();
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             sizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             this._canvas = this.rootObject.GetComponent<Canvas>();
             this._canvas.sortingOrder = 3;
-            this._curvedCanvasSettings = this.rootObject.GetComponent<CurvedCanvasSettings>();
-            this._curvedCanvasSettings.SetRadius(600f);
             this._canvas.renderMode = RenderMode.WorldSpace;
             var rectTransform = this._canvas.transform as RectTransform;
             rectTransform.sizeDelta = CanvasSize;
@@ -94,7 +89,6 @@ namespace PlayerInfoViewer.Views
             gameObj.SetActive(false);
 
             var textMesh = gameObj.AddComponent<CurvedTextMeshPro>();
-            textMesh.font = Instantiate(Resources.FindObjectsOfTypeAll<TMP_FontAsset>().First(t => t.name == "Teko-Medium SDF Numbers Monospaced Curved"));
             textMesh.rectTransform.SetParent(parent, false);
             textMesh.text = text;
             textMesh.fontSize = 4;
