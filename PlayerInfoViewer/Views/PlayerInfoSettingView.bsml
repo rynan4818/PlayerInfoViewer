@@ -1,0 +1,13 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' 
+	xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'
+	>
+  <settings-container>
+    <increment-setting text="Date Change Time" value="DateChangeTime" increment="1" min="0" max="23" integer-only="true" formatter="TimeFormatter" apply-on-change="true"></increment-setting>
+    <increment-setting text="Interval Time" value="IntervalTime" increment="1" min="0" integer-only="true" formatter="TimeFormatter" apply-on-change="true"></increment-setting>
+    <bool-setting text='Rank PP' value='ViewRankPP'></bool-setting>
+    <bool-setting text='Play Count' value='ViewPlayCount'></bool-setting>
+    <bool-setting text='Player Statistics' value='ViewPlayerStatistics'></bool-setting>
+    <increment-setting text="Font Size" value="ViewFontSize" increment="1" min="1" integer-only="true" apply-on-change="true"></increment-setting>
+    <increment-setting text="Y Offset" value="ViewYoffset" increment="0.1" apply-on-change="true"></increment-setting>
+  </settings-container>
+</bg>

@@ -8,6 +8,7 @@ namespace PlayerInfoViewer.Installers
         public override void InstallBindings()
         {
             this.Container.BindInterfacesAndSelfTo<PlayerDataManager>().AsSingle().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<HDTDataJson>().AsSingle().NonLazy();
         }
     }
 }

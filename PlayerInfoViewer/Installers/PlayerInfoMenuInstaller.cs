@@ -7,7 +7,8 @@ namespace PlayerInfoViewer.Installers
     {
         public override void InstallBindings()
         {
-            this.Container.BindInterfacesAndSelfTo<PlayerInfoView>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<PlayerInfoView>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<PlayerInfoSettingView>().FromNewComponentAsViewController().AsSingle().NonLazy();
         }
     }
 }

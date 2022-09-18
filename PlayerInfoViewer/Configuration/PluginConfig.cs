@@ -8,10 +8,17 @@ namespace PlayerInfoViewer.Configuration
     {
         public static PluginConfig Instance { get; set; }
         // BSIPAが値の変更を検出し、自動的に設定を保存したい場合は、'virtual'でなければなりません。
-        public virtual string LastPlayTime { get; set; } = null; //最後に起動した時間
         public virtual int DateChangeTime { get; set; } = 3;     //日付変更する時刻(24時間表記)
         public virtual int IntervalTime { get; set; } = 3;       //日付変更に必要なインターバル時間
-        public virtual string LastGetTime { get; set; } = null;  //前回記録の取得時間
+        public virtual bool ViewPlayCount { get; set; } = true;
+        public virtual bool ViewRankPP { get; set; } = true;
+        public virtual bool ViewPlayerStatistics { get; set; } = true;
+        public virtual float ViewFontSize { get; set; } = 14f;
+        public virtual float ViewYoffset { get; set; } = 0;
+        public virtual string LastPlayTime { get; set; } = null; //最後に起動した時間
+        public virtual bool LastPlayerInfoNoGet { get; set; } = false;  //前回記録のScoreSaber記録が取得できなかったとき
+        public virtual string LastGetTime { get; set; } = null;  //前回記録のScoreSaber取得時間
+        public virtual string LastGetStatisticsTime { get; set; } = null; //前回記録のStatistics取得時間
         public virtual float LastPP { get; set; } = 0;
         public virtual int LastRank { get; set; } = 0;
         public virtual int LastCountryRank { get; set; } = 0;
@@ -21,6 +28,13 @@ namespace PlayerInfoViewer.Configuration
         public virtual int LastTotalPlayCount { get; set; } = 0;
         public virtual int LastRankedPlayCount { get; set; } = 0;
         public virtual int LastReplaysWatched { get; set; } = 0;
+        public virtual int LastPlayedLevelsCount { get; set; } = 0;
+        public virtual int LastClearedLevelsCount { get; set; } = 0;
+        public virtual int LastFailedLevelsCount { get; set; } = 0;
+        public virtual int LastFullComboCount { get; set; } = 0;
+        public virtual float LastTimePlayed { get; set; } = 0;
+        public virtual int LastHandDistanceTravelled { get; set; } = 0;
+        public virtual float LastHeadDistanceTravelled { get; set; } = 0;
         public virtual float BeforePP { get; set; } = 0;
         public virtual float NowPP { get; set; } = 0;
         /// <summary>
