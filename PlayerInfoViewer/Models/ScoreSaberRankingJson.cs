@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using PlayerInfoViewer.Configuration;
 using PlayerInfoViewer.Util;
 
 namespace PlayerInfoViewer.Models
@@ -25,32 +24,30 @@ namespace PlayerInfoViewer.Models
             if (DateTime.Now - this._dataGetTime < new TimeSpan(0, 15, 0))
                 return;
             this._getDataActive = true;
-            var scoresaberURL = "https://rynan4818.github.io/ScoreSaberRanking/json/scoresaber_rank_index.json";
-            var resJsonString = await Utility.GetHttpContent(RankingHttpClient, scoresaberURL);
-            if (resJsonString == null)
+            try
             {
-                this._getDataActive = false;
-                return;
+                var rankingURL = "https://rynan4818.github.io/ScoreSaberRanking/json/scoresaber_rank_index.json";
+                var resJsonString = await Utility.GetHttpContent(RankingHttpClient, rankingURL);
+                if (resJsonString == null)
+                    throw new Exception("Ranking index get error");
+                this._rankingIndex = JsonConvert.DeserializeObject<ScoreSaberRankingIndexJson>(resJsonString);
+                this._dataGetTime = DateTime.Now;
+                List<int> userIndexData;
+                if (!this._rankingIndex.UserIndexData.TryGetValue(userID, out userIndexData))
+                    throw new Exception("UserID not found in ranking");
+                this._userIDindex = userIndexData[1];
+                var rankingFile = this._rankingIndex.RankingDataFile[userIndexData[0]];
+                rankingURL = $"https://rynan4818.github.io/ScoreSaberRanking/json/{rankingFile}";
+                resJsonString = await Utility.GetHttpContent(RankingHttpClient, rankingURL);
+                if (resJsonString == null)
+                    throw new Exception("Ranking data get error");
+                this._rankingData = JsonConvert.DeserializeObject<ScoreSaberRankingDataJson>(resJsonString);
+                Plugin.Log.Info("UserRankingData Get Complete!");
             }
-            this._rankingIndex = JsonConvert.DeserializeObject<ScoreSaberRankingIndexJson>(resJsonString);
-            this._dataGetTime = DateTime.Now;
-            List<int> userIndexData;
-            if (!this._rankingIndex.UserIndexData.TryGetValue(userID, out userIndexData))
+            catch (Exception ex)
             {
-                this._getDataActive = false;
-                return;
+                Plugin.Log.Error(ex.ToString());
             }
-            this._userIDindex = userIndexData[1];
-            var rankingFile = this._rankingIndex.RankingDataFile[userIndexData[0]];
-            scoresaberURL = $"https://rynan4818.github.io/ScoreSaberRanking/json/{rankingFile}";
-            resJsonString = await Utility.GetHttpContent(RankingHttpClient, scoresaberURL);
-            if (resJsonString == null)
-            {
-                this._getDataActive = false;
-                return;
-            }
-            this._rankingData = JsonConvert.DeserializeObject<ScoreSaberRankingDataJson>(resJsonString);
-            Plugin.Log.Info("UserRankingData Get Complete!");
             this._getDataActive = false;
         }
         public object GetRankingData(string column)

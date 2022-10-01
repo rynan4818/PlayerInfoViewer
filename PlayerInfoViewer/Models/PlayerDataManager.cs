@@ -4,7 +4,6 @@ using System;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Zenject;
-using System.Net;
 using System.Net.Http;
 
 namespace PlayerInfoViewer.Models
@@ -55,8 +54,19 @@ namespace PlayerInfoViewer.Models
             this._playerInfoGetActive = true;
             this._playerFullInfo = null;
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
-            var resJsonString = await Utility.GetHttpContent(ScoresaberHttpClient, playerFullInfoURL);
-            this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
+            try
+            {
+                var resJsonString = await Utility.GetHttpContent(ScoresaberHttpClient, playerFullInfoURL);
+                if (resJsonString == null)
+                    throw new Exception("Player full info get error");
+                this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.Error(ex.ToString());
+                this._playerInfoGetActive = false;
+                return;
+            }
             if (PluginConfig.Instance.LastTimePlayed == 0)
                 LastUpdateStatisticsData();
             if (PluginConfig.Instance.BeforePP == 0)
