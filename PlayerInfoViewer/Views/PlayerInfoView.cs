@@ -18,6 +18,7 @@ namespace PlayerInfoViewer.Views
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
         private PlayerDataModel _playerDataModel;
         private PlayerDataManager _playerDataManager;
+        private ScoreSaberRankingJson _rankingData;
         private HDTDataJson _hdtDataJson;
         public GameObject rootObject;
         private Canvas _canvas;
@@ -33,12 +34,13 @@ namespace PlayerInfoViewer.Views
 
         //MonoBehaviourはコンストラクタを使えないので、メソッドでインジェクションする
         [Inject]
-        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, HDTDataJson hdtDataJson)
+        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, HDTDataJson hdtDataJson, ScoreSaberRankingJson rankingData)
         {
             this._playerDataManager = playerDataManager;
             this._platformLeaderboardViewController = platformLeaderboardViewController;
             this._playerDataModel = playerDataModel;
             this._hdtDataJson = hdtDataJson;
+            this._rankingData = rankingData;
         }
         private void Awake()
         {
@@ -159,7 +161,21 @@ namespace PlayerInfoViewer.Views
             var rankedPlayCount = this._playerDataManager._playerFullInfo.scoreStats.rankedPlayCount;
             var todayPlayCount = String.Format("{0:+#;-#;#}", playCount - PluginConfig.Instance.LastTotalPlayCount);
             var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - PluginConfig.Instance.LastRankedPlayCount);
-            this._playCount.text = $"Total Play Count : {playCount} {todayPlayCount}    Ranked Play Count : {rankedPlayCount} {todayRankedPlayCount}";
+            var totalPlayCountRankObject = this._rankingData.GetRankingData("TotalPlayCountRank");
+            string totalPlayCountRank = "";
+            if (totalPlayCountRankObject != null)
+                totalPlayCountRank = $"   #{totalPlayCountRankObject}";
+            var totalPlayCountLocalRankObject = this._rankingData.GetRankingData("TotalPlayCountLocalRank");
+            if (totalPlayCountLocalRankObject != null)
+                totalPlayCountRank += $"/#{totalPlayCountLocalRankObject}";
+            var rankedPlayCountRankObject = this._rankingData.GetRankingData("RankedPlayCountRank");
+            string rankedPlayCountRank = "";
+            if (rankedPlayCountRankObject != null)
+                rankedPlayCountRank = $"   #{rankedPlayCountRankObject}";
+            var rankedPlayCountLocalRankObject = this._rankingData.GetRankingData("RankedPlayCountLocalRank");
+            if (rankedPlayCountLocalRankObject != null)
+                rankedPlayCountRank += $"/#{rankedPlayCountLocalRankObject}";
+            this._playCount.text = $"Play Count    Total : {playCount} {todayPlayCount}{totalPlayCountRank}    Ranked : {rankedPlayCount} {todayRankedPlayCount}{rankedPlayCountRank}";
         }
         public void OnRankPpChange()
         {
@@ -203,6 +219,7 @@ namespace PlayerInfoViewer.Views
         public async void OnScoreUploaded()
         {
             await this._playerDataManager.GetPlayerFullInfo();
+            await this._rankingData.GetUserRanking(this._playerDataManager._userID);
             this.OnPlayCountChange();
             this.OnRankPpChange();
         }

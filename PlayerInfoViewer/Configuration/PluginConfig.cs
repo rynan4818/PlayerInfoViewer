@@ -13,7 +13,7 @@ namespace PlayerInfoViewer.Configuration
         public virtual bool ViewPlayCount { get; set; } = true;
         public virtual bool ViewRankPP { get; set; } = true;
         public virtual bool ViewPlayerStatistics { get; set; } = true;
-        public virtual float ViewFontSize { get; set; } = 14f;
+        public virtual float ViewFontSize { get; set; } = 12f;
         public virtual float ViewYoffset { get; set; } = 0;
         public virtual string LastPlayTime { get; set; } = null; //最後に起動した時間
         public virtual bool LastPlayerInfoNoGet { get; set; } = false;  //前回記録のScoreSaber記録が取得できなかったとき

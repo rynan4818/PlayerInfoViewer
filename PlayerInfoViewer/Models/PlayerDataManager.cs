@@ -1,9 +1,11 @@
 ﻿using PlayerInfoViewer.Configuration;
+using PlayerInfoViewer.Util;
 using System;
 using Newtonsoft.Json;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Zenject;
+using System.Net;
+using System.Net.Http;
 
 namespace PlayerInfoViewer.Models
 {
@@ -12,17 +14,19 @@ namespace PlayerInfoViewer.Models
         private readonly IPlatformUserModel _userModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly HDTDataJson _hdtData;
-        public static readonly HttpClient HttpClient = new HttpClient();
+        private readonly ScoreSaberRankingJson _rankingData;
+        public static readonly HttpClient ScoresaberHttpClient = new HttpClient();
         public bool _playerInfoGetActive = false;
         public string _userID;
         public PlayerFullInfoJson _playerFullInfo;
         public event Action OnPlayerDataInitFinish;
 
-        public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, HDTDataJson hdtData)
+        public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, HDTDataJson hdtData, ScoreSaberRankingJson rankingData)
         {
             this._userModel = userModel;
             this._playerDataModel = playerDataModel;
             this._hdtData = hdtData;
+            this._rankingData = rankingData;
         }
 
         public async void Initialize()
@@ -32,6 +36,7 @@ namespace PlayerInfoViewer.Models
             this._userID = userInfo.platformUserId;
             await GetPlayerFullInfo();
             this._hdtData.Load();
+            await this._rankingData.GetUserRanking(this._userID);
             DateTime lastPlayTime;
             if (!DateTime.TryParse(PluginConfig.Instance.LastPlayTime, out lastPlayTime))
                 lastPlayTime = DateTime.Now.AddYears(-1);
@@ -50,30 +55,7 @@ namespace PlayerInfoViewer.Models
             this._playerInfoGetActive = true;
             this._playerFullInfo = null;
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
-            HttpResponseMessage response;
-            try
-            {
-                response = await HttpClient.GetAsync(playerFullInfoURL);
-            }
-            catch (HttpRequestException)
-            {
-                Plugin.Log.Error("ScoreSaber Http Error");
-                this._playerInfoGetActive = false;
-                return;
-            }
-            catch (TaskCanceledException)
-            {
-                Plugin.Log.Error("ScoreSaber Http Cancel");
-                this._playerInfoGetActive = false;
-                return;
-            }
-            catch (Exception)
-            {
-                Plugin.Log.Error("ScoreSaber Other Error");
-                this._playerInfoGetActive = false;
-                return;
-            }
-            var resJsonString = await response.Content.ReadAsStringAsync();
+            var resJsonString = await Utility.GetHttpContent(ScoresaberHttpClient, playerFullInfoURL);
             this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
             if (PluginConfig.Instance.LastTimePlayed == 0)
                 LastUpdateStatisticsData();
