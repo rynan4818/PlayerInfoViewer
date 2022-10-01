@@ -2,27 +2,23 @@
 
 このBeatSaberプラグインは、ScoreSaberのプレイヤー情報のうちScoreSaber modで表示されない項目を追加表示します。
 
-また、ランクアップした順位や、増加したプレイカウント、増えたpp、PLAYER STATISTICSなど当日に変化のあった差分も表示します。
+また、ランクアップした順位や、増加したプレイカウント及び[ScoreSaberRanking](https://github.com/rynan4818/ScoreSaberRanking)のランク表示、増えたpp、PLAYER STATISTICSなど当日に変化のあった差分も表示します。
 
 [HeadDistanceTravelled](https://github.com/denpadokei/HeadDistanceTravelled)を使用している場合は、当日の増加HDTも表示します。
 
 This BeatSaber plug-in additionally displays items of ScoreSaber player information that are not displayed by the ScoreSaber mod.
 
-It also displays differences that have changed on the day, such as ranks increased, play counts increased, pp increased, etc.
+It also displays the ranks that have increased, the increased play counts and [ScoreSaberRanking](https://github.com/rynan4818/ScoreSaberRanking) ranks, the increased pp, PLAYER STATISTICS, and other differences that have changed on the day of the event. The differences of the changes on the day are also displayed.
 
 If [HeadDistanceTravelled](https://github.com/denpadokei/HeadDistanceTravelled) is used, the increased HDT for the day is also displayed.
 
-![image](https://user-images.githubusercontent.com/14249877/190883794-24f416f0-a367-4a17-bce4-cd05137ce3df.png)
+![image](https://user-images.githubusercontent.com/14249877/193413697-f5aadd39-aef8-40b5-a3af-59a03a7f320c.png)
 
 表示内容は今後拡張していくつもりです。
-
-私の[ScoreSaberRanking](https://github.com/rynan4818/ScoreSaberRanking)のランク情報とかも表示できるようにするつもりです。
 
 あと、表示がテキトーなので、もっとカッコよく表示したい。
 
 We intend to expand the contents of the display in the future.
-
-I intend to be able to display my [ScoreSaberRanking](https://github.com/rynan4818/ScoreSaberRanking) rank information and so on.
 
 Also, I would like to make the display more cool, since it is very plain.
 
