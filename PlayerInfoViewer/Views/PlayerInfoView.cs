@@ -200,6 +200,8 @@ namespace PlayerInfoViewer.Views
         }
         public void OnPlayerDataInitFinish()
         {
+            if (!this._playerDataManager._initFinish)
+                return;
             this.PlyerStatisticsChange();
             this.OnPlayCountChange();
             this.OnRankPpChange();

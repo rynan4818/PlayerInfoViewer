@@ -19,6 +19,7 @@ namespace PlayerInfoViewer.Models
         public string _userID;
         public PlayerFullInfoJson _playerFullInfo;
         public event Action OnPlayerDataInitFinish;
+        public bool _initFinish = false;
 
         public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, HDTDataJson hdtData, ScoreSaberRankingJson rankingData)
         {
@@ -45,6 +46,7 @@ namespace PlayerInfoViewer.Models
                 LastPlayerInfoUpdate();
             }
             PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
+            this._initFinish = true;
             this.OnPlayerDataInitFinish?.Invoke();
         }
         public async Task GetPlayerFullInfo()
