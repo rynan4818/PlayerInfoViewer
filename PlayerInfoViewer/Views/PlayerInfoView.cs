@@ -149,7 +149,7 @@ namespace PlayerInfoViewer.Views
         {
             if (!PluginConfig.Instance.ViewPlayCount)
                 return;
-            if (this._playerDataManager._playerFullInfo == null)
+            if (this._playerDataManager._playerFullInfo == null || this._playerDataManager._playerFullInfo.id == null)
             {
                 this._playCount.color = Color.red;
                 this._playCount.text = " ScoreSaber Error!";
@@ -181,7 +181,7 @@ namespace PlayerInfoViewer.Views
         {
             if (!PluginConfig.Instance.ViewRankPP)
                 return;
-            if (this._playerDataManager._playerFullInfo == null)
+            if (this._playerDataManager._playerFullInfo == null || this._playerDataManager._playerFullInfo.id == null)
             {
                 this._rankPP.color = Color.red;
                 this._rankPP.text = " ScoreSaber Error!";
@@ -211,7 +211,7 @@ namespace PlayerInfoViewer.Views
             this.rootObject.SetActive(true);
             this.PlyerStatisticsChange();
             this._hdtDataJson.Load();
-            if (this._playerDataManager._playerFullInfo == null && !this._playerDataManager._playerInfoGetActive)
+            if ((this._playerDataManager._playerFullInfo == null || this._playerDataManager._playerFullInfo.id == null) && !this._playerDataManager._playerInfoGetActive)
                 this.OnScoreUploaded();
         }
         public void OnLeaderboardDeactivated(bool removedFromHierarchy, bool screenSystemDisabling)
