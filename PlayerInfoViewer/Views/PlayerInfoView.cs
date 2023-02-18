@@ -2,6 +2,7 @@
 using LeaderboardCore.Interfaces;
 using PlayerInfoViewer.Configuration;
 using PlayerInfoViewer.Models;
+using PlayerInfoViewer.HarmonyPatches;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +27,9 @@ namespace PlayerInfoViewer.Views
         private CurvedTextMeshPro _playCount;
         private CurvedTextMeshPro _rankPP;
         public float lastPlayed;
+        public int _co2;
+        public double _hum;
+        public double _tmp;
 
         public static readonly Vector2 CanvasSize = new Vector2(100, 50);
         public static readonly Vector3 Scale = new Vector3(0.01f, 0.01f, 0.01f);
@@ -90,6 +94,7 @@ namespace PlayerInfoViewer.Views
             this._platformLeaderboardViewController.didActivateEvent += this.OnLeaderboardActivated;
             this._platformLeaderboardViewController.didDeactivateEvent += this.OnLeaderboardDeactivated;
             this._playerDataManager.OnPlayerDataInitFinish += this.OnPlayerDataInitFinish;
+            CO2CoreManagerPatch.OnCO2Changed += this.OnCO2Change;
             this.OnPlayerDataInitFinish();
             this.rootObject.SetActive(false);
         }
@@ -99,6 +104,7 @@ namespace PlayerInfoViewer.Views
             this._playerDataManager.OnPlayerDataInitFinish -= this.OnPlayerDataInitFinish;
             this._platformLeaderboardViewController.didDeactivateEvent -= this.OnLeaderboardDeactivated;
             this._platformLeaderboardViewController.didActivateEvent -= this.OnLeaderboardActivated;
+            CO2CoreManagerPatch.OnCO2Changed -= this.OnCO2Change;
             Destroy(this.rootObject);
         }
         private CurvedTextMeshPro CreateText(RectTransform parent, string text, Vector2 anchoredPosition)
@@ -196,7 +202,19 @@ namespace PlayerInfoViewer.Views
             var todayLocalRankUp = String.Format("{0:+#;-#;#}", PluginConfig.Instance.LastCountryRank - localRank);
             var todayPpUp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(pp - PluginConfig.Instance.LastPP, 2, MidpointRounding.AwayFromZero));
             var lastChangePp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(PluginConfig.Instance.NowPP - PluginConfig.Instance.BeforePP, 2, MidpointRounding.AwayFromZero));
-            this._rankPP.text = $"Global : {todayRankUp}    Local : #{localRank} {todayLocalRankUp}    Today : {todayPpUp}pp  Last : {lastChangePp}pp";
+            var text = $"Global : {todayRankUp}    Local : #{localRank} {todayLocalRankUp}    Today : {todayPpUp}pp  Last : {lastChangePp}pp";
+            if (CO2CoreManagerPatch.Enable)
+                text += $"    {this._co2}ppm  {this._tmp}℃  {this._hum}%";
+            this._rankPP.text = text;
+        }
+        public void OnCO2Change((int, double, double) co2data)
+        {
+            this._co2 = co2data.Item1;
+            this._hum = co2data.Item2;
+            this._tmp = co2data.Item3;
+            if (!this._playerDataManager._initFinish)
+                return;
+            this.OnRankPpChange();
         }
         public void OnPlayerDataInitFinish()
         {

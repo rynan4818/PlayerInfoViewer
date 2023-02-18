@@ -1,5 +1,7 @@
 ﻿using PlayerInfoViewer.Installers;
 using PlayerInfoViewer.Configuration;
+using PlayerInfoViewer.HarmonyPatches;
+using HarmonyLib;
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
@@ -12,6 +14,8 @@ namespace PlayerInfoViewer
     [Plugin(RuntimeOptions.SingleStartInit)]
     public class Plugin
     {
+        public static Harmony _harmony;
+        public const string HARMONY_ID = "com.github.rynan4818.PlayerInfoViewer";
         internal static Plugin Instance { get; private set; }
         internal static IPALogger Log { get; private set; }
 
@@ -27,6 +31,7 @@ namespace PlayerInfoViewer
             Instance = this;
             Log = logger;
             Log.Debug("Initialized.");
+            _harmony = new Harmony(HARMONY_ID);
             PluginConfig.Instance = conf.Generated<PluginConfig>();
             zenjector.Install<PlayerInfoAppInstaller>(Location.App);
             zenjector.Install<PlayerInfoMenuInstaller>(Location.Menu);
@@ -36,6 +41,13 @@ namespace PlayerInfoViewer
         public void OnApplicationStart()
         {
             Log.Info("OnApplicationStart");
+            var orginal = AccessTools.Method("CO2Core.Models.CO2CoreManager:UpdateCO2");
+            var postfix = AccessTools.Method(typeof(CO2CoreManagerPatch), "UpdateCO2Postfix");
+            if (orginal != null)
+            {
+                Log.Debug("CO2CoreManager Patch Load");
+                _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
+            }
         }
 
         [OnExit]
@@ -43,6 +55,7 @@ namespace PlayerInfoViewer
         {
             PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
             Log.Debug("OnApplicationQuit");
+            _harmony?.UnpatchSelf();
         }
     }
 }

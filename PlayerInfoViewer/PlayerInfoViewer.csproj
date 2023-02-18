@@ -42,6 +42,11 @@
     <DisableZipRelease>True</DisableZipRelease>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
       <Private>False</Private>
@@ -125,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\PluginConfig.cs" />
+    <Compile Include="HarmonyPatches\CO2CoreManagerPatch.cs" />
     <Compile Include="Installers\PlayerInfoAppInstaller.cs" />
     <Compile Include="Installers\PlayerInfoMenuInstaller.cs" />
     <Compile Include="Models\HDTDataJson.cs" />
