@@ -131,6 +131,8 @@
   <ItemGroup>
     <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="HarmonyPatches\CO2CoreManagerPatch.cs" />
+    <Compile Include="HarmonyPatches\CustomLeaderboardHidePatch.cs" />
+    <Compile Include="HarmonyPatches\CustomLeaderboardShowPatch.cs" />
     <Compile Include="Installers\PlayerInfoAppInstaller.cs" />
     <Compile Include="Installers\PlayerInfoMenuInstaller.cs" />
     <Compile Include="Models\HDTDataJson.cs" />

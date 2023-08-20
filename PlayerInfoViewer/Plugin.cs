@@ -8,6 +8,8 @@ using IPA.Config.Stores;
 using SiraUtil.Zenject;
 using System;
 using IPALogger = IPA.Logging.Logger;
+using System.Reflection;
+using IPA.Loader;
 
 namespace PlayerInfoViewer
 {
@@ -18,6 +20,7 @@ namespace PlayerInfoViewer
         public const string HARMONY_ID = "com.github.rynan4818.PlayerInfoViewer";
         internal static Plugin Instance { get; private set; }
         internal static IPALogger Log { get; private set; }
+        internal PluginMetadata leaderboardCore;
 
         /// <summary>
         /// IPAによってプラグインが最初にロードされたときに呼び出されます。
@@ -48,6 +51,11 @@ namespace PlayerInfoViewer
                 Log.Debug("CO2CoreManager Patch Load");
                 _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
             }
+            leaderboardCore = PluginManager.GetPluginFromId("LeaderboardCore");
+            if (leaderboardCore == null)
+                leaderboardCore = PluginManager.GetDisabledPluginFromId("LeaderboardCore");
+            if (leaderboardCore != null)
+                _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [OnExit]
