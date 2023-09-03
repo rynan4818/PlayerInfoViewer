@@ -141,7 +141,7 @@
     <Compile Include="Models\ScoreSaberRankingJson.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\Utility.cs" />
+    <Compile Include="Util\HttpUtility.cs" />
     <Compile Include="Views\PlayerInfoSettingView.cs" />
     <Compile Include="Views\PlayerInfoView.cs" />
   </ItemGroup>

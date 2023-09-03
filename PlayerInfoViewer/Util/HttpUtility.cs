@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace PlayerInfoViewer.Util
 {
-    public static class Utility
+    public static class HttpUtility
     {
         public static async Task<string> GetHttpContent(HttpClient HttpClient, string url)
         {

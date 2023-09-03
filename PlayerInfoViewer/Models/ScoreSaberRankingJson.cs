@@ -27,7 +27,7 @@ namespace PlayerInfoViewer.Models
             try
             {
                 var rankingURL = "https://rynan4818.github.io/ScoreSaberRanking/json/scoresaber_rank_index.json";
-                var resJsonString = await Utility.GetHttpContent(RankingHttpClient, rankingURL);
+                var resJsonString = await HttpUtility.GetHttpContent(RankingHttpClient, rankingURL);
                 if (resJsonString == null)
                     throw new Exception("Ranking index get error");
                 this._rankingIndex = JsonConvert.DeserializeObject<ScoreSaberRankingIndexJson>(resJsonString);
@@ -38,7 +38,7 @@ namespace PlayerInfoViewer.Models
                 this._userIDindex = userIndexData[1];
                 var rankingFile = this._rankingIndex.RankingDataFile[userIndexData[0]];
                 rankingURL = $"https://rynan4818.github.io/ScoreSaberRanking/json/{rankingFile}";
-                resJsonString = await Utility.GetHttpContent(RankingHttpClient, rankingURL);
+                resJsonString = await HttpUtility.GetHttpContent(RankingHttpClient, rankingURL);
                 if (resJsonString == null)
                     throw new Exception("Ranking data get error");
                 this._rankingData = JsonConvert.DeserializeObject<ScoreSaberRankingDataJson>(resJsonString);

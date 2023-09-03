@@ -58,7 +58,7 @@ namespace PlayerInfoViewer.Models
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
             try
             {
-                var resJsonString = await Utility.GetHttpContent(ScoresaberHttpClient, playerFullInfoURL);
+                var resJsonString = await HttpUtility.GetHttpContent(ScoresaberHttpClient, playerFullInfoURL);
                 if (resJsonString == null)
                     throw new Exception("Player full info get error");
                 this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
