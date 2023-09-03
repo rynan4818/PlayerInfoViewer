@@ -36,8 +36,10 @@ namespace PlayerInfoViewer.Models
         {
             var userInfo = await _userModel.GetUserInfo();
             this._userID = userInfo.platformUserId;
-            await this.GetPlayerFullInfo();
+            await this.GetPlayerInfoAsync();
             this._hdtData.Load();
+            if (PluginConfig.Instance.LastTimePlayed == 0)
+                LastUpdateStatisticsData();
             await this._rankingData.GetUserRankingAsync(this._userID);
             //日付更新処理
             DateTime lastPlayTime;
@@ -52,12 +54,12 @@ namespace PlayerInfoViewer.Models
             this._initFinish = true;
             this.OnPlayerDataInitFinish?.Invoke();
         }
-        public async Task GetPlayerFullInfo()
+        public async Task GetPlayerInfoAsync()
         {
             await this._scoreSaberPlayerInfo.GetPlayerFullInfoAsync(this._userID);
+            if (this._scoreSaberPlayerInfo._playerFullInfo == null)
+                return;
             //最終記録が初期値の場合の更新
-            if (PluginConfig.Instance.LastTimePlayed == 0)
-                LastUpdateStatisticsData();
             if (PluginConfig.Instance.BeforePP == 0)
             {
                 PluginConfig.Instance.BeforePP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
@@ -68,7 +70,7 @@ namespace PlayerInfoViewer.Models
                 PluginConfig.Instance.BeforePP = PluginConfig.Instance.NowPP;
             PluginConfig.Instance.NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
 
-            //サーバエラーで未更新時の初回更新・・・無条件更新してないか？
+            //サーバエラーで最終記録が未更新時で更新可能になった場合
             if (PluginConfig.Instance.LastPlayerInfoNoGet)
                 LastUpdatePlayerInfo();
         }

@@ -240,7 +240,7 @@ namespace PlayerInfoViewer.Views
         }
         public async void OnScoreUploaded()
         {
-            await this._playerDataManager.GetPlayerFullInfo();
+            await this._playerDataManager.GetPlayerInfoAsync();
             await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
             this.OnPlayCountChange();
             this.OnRankPpChange();
