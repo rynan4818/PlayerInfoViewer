@@ -19,6 +19,7 @@ namespace PlayerInfoViewer.Views
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
         private PlayerDataModel _playerDataModel;
         private PlayerDataManager _playerDataManager;
+        private ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
         private ScoreSaberRanking _rankingData;
         private HDTDataJson _hdtDataJson;
         public GameObject rootObject;
@@ -38,13 +39,14 @@ namespace PlayerInfoViewer.Views
 
         //MonoBehaviourはコンストラクタを使えないので、メソッドでインジェクションする
         [Inject]
-        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, HDTDataJson hdtDataJson, ScoreSaberRanking rankingData)
+        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, ScoreSaberPlayerInfo scoreSaberPlayerInfo, HDTDataJson hdtDataJson, ScoreSaberRanking rankingData)
         {
             this._playerDataManager = playerDataManager;
             this._platformLeaderboardViewController = platformLeaderboardViewController;
             this._playerDataModel = playerDataModel;
             this._hdtDataJson = hdtDataJson;
             this._rankingData = rankingData;
+            this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
         }
         private void Awake()
         {
@@ -155,7 +157,7 @@ namespace PlayerInfoViewer.Views
         {
             if (!PluginConfig.Instance.ViewPlayCount)
                 return;
-            if (this._playerDataManager._playerFullInfo == null || this._playerDataManager._playerFullInfo.id == null)
+            if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
             {
                 this._playCount.color = Color.red;
                 this._playCount.text = " ScoreSaber Error!";
@@ -163,8 +165,8 @@ namespace PlayerInfoViewer.Views
             }
             else
                 this._playCount.color = Color.white;
-            var playCount = this._playerDataManager._playerFullInfo.scoreStats.totalPlayCount;
-            var rankedPlayCount = this._playerDataManager._playerFullInfo.scoreStats.rankedPlayCount;
+            var playCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.totalPlayCount;
+            var rankedPlayCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.rankedPlayCount;
             var todayPlayCount = String.Format("{0:+#;-#;#}", playCount - PluginConfig.Instance.LastTotalPlayCount);
             var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - PluginConfig.Instance.LastRankedPlayCount);
             var totalPlayCountRankObject = this._rankingData.GetRankingData("TotalPlayCountRank");
@@ -187,7 +189,7 @@ namespace PlayerInfoViewer.Views
         {
             if (!PluginConfig.Instance.ViewRankPP)
                 return;
-            if (this._playerDataManager._playerFullInfo == null || this._playerDataManager._playerFullInfo.id == null)
+            if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
             {
                 this._rankPP.color = Color.red;
                 this._rankPP.text = " ScoreSaber Error!";
@@ -195,9 +197,9 @@ namespace PlayerInfoViewer.Views
             }
             else
                 this._rankPP.color = Color.white;
-            var pp = this._playerDataManager._playerFullInfo.pp;
-            var localRank = this._playerDataManager._playerFullInfo.countryRank;
-            var rank = this._playerDataManager._playerFullInfo.rank;
+            var pp = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+            var localRank = this._scoreSaberPlayerInfo._playerFullInfo.countryRank;
+            var rank = this._scoreSaberPlayerInfo._playerFullInfo.rank;
             var todayRankUp = String.Format("{0:+#;-#;+0}", PluginConfig.Instance.LastRank - rank);
             var todayLocalRankUp = String.Format("{0:+#;-#;#}", PluginConfig.Instance.LastCountryRank - localRank);
             var todayPpUp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(pp - PluginConfig.Instance.LastPP, 2, MidpointRounding.AwayFromZero));
@@ -229,7 +231,7 @@ namespace PlayerInfoViewer.Views
             this.rootObject.SetActive(true);
             this.PlyerStatisticsChange();
             this._hdtDataJson.Load();
-            if ((this._playerDataManager._playerFullInfo == null || this._playerDataManager._playerFullInfo.id == null) && !this._playerDataManager._playerInfoGetActive)
+            if ((this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null) && !this._scoreSaberPlayerInfo._playerInfoGetActive)
                 this.OnScoreUploaded();
         }
         public void OnLeaderboardDeactivated(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -239,7 +241,7 @@ namespace PlayerInfoViewer.Views
         public async void OnScoreUploaded()
         {
             await this._playerDataManager.GetPlayerFullInfo();
-            await this._rankingData.GetUserRanking(this._playerDataManager._userID);
+            await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
             this.OnPlayCountChange();
             this.OnRankPpChange();
         }

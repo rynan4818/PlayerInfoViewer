@@ -7,29 +7,27 @@ namespace PlayerInfoViewer.Util
     public static class HttpUtility
     {
         public static readonly HttpClient httpClient = new HttpClient();
-        public static async Task<string> GetHttpContent(string url)
+        public static async Task<string> GetHttpContentAsync(string url)
         {
-            HttpResponseMessage response;
             try
             {
-                response = await httpClient.GetAsync(url);
+                return await httpClient.GetStringAsync(url);
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException e)
             {
-                Plugin.Log.Error($"{url} Http Error");
+                Plugin.Log.Error($"{url} Http Error : {e.Message}");
                 return null;
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException e)
             {
-                Plugin.Log.Error($"{url} Http Cancel");
+                Plugin.Log.Error($"{url} Http Cancel : {e.Message}");
                 return null;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Plugin.Log.Error($"{url} Other Error");
+                Plugin.Log.Error($"{url} Http other Error : {e.Message}");
                 return null;
             }
-            return await response.Content.ReadAsStringAsync();
         }
     }
 }

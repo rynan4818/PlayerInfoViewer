@@ -1,7 +1,5 @@
 ﻿using PlayerInfoViewer.Configuration;
-using PlayerInfoViewer.Util;
 using System;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Zenject;
 
@@ -11,30 +9,37 @@ namespace PlayerInfoViewer.Models
     {
         private readonly IPlatformUserModel _userModel;
         private readonly PlayerDataModel _playerDataModel;
+        private readonly ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
         private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRanking _rankingData;
-        public bool _playerInfoGetActive = false;
         public string _userID;
-        public PlayerFullInfoJson _playerFullInfo;
         public event Action OnPlayerDataInitFinish;
-        public bool _initFinish = false;
+        public bool _initFinish { get; set; } = false;
 
-        public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, HDTDataJson hdtData, ScoreSaberRanking rankingData)
+        public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, ScoreSaberPlayerInfo scoreSaberPlayerInfo, HDTDataJson hdtData, ScoreSaberRanking rankingData)
         {
             this._userModel = userModel;
             this._playerDataModel = playerDataModel;
+            this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
             this._hdtData = hdtData;
             this._rankingData = rankingData;
         }
 
-        public async void Initialize()
+        public void Initialize()
         {
             Plugin.Log.Debug("PlayerDataManager Initialize");
+            // async void警察に怒られないようにします(；・∀・) https://light11.hatenadiary.com/entry/2019/03/05/221311
+            _ = this.InitializeAsync();
+        }
+
+        public async Task InitializeAsync()
+        {
             var userInfo = await _userModel.GetUserInfo();
             this._userID = userInfo.platformUserId;
-            await GetPlayerFullInfo();
+            await this.GetPlayerFullInfo();
             this._hdtData.Load();
-            await this._rankingData.GetUserRanking(this._userID);
+            await this._rankingData.GetUserRankingAsync(this._userID);
+            //日付更新処理
             DateTime lastPlayTime;
             if (!DateTime.TryParse(PluginConfig.Instance.LastPlayTime, out lastPlayTime))
                 lastPlayTime = DateTime.Now.AddYears(-1);
@@ -49,37 +54,23 @@ namespace PlayerInfoViewer.Models
         }
         public async Task GetPlayerFullInfo()
         {
-            if (this._userID == null || this._playerInfoGetActive)
-                return;
-            this._playerInfoGetActive = true;
-            this._playerFullInfo = null;
-            var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
-            try
-            {
-                var resJsonString = await HttpUtility.GetHttpContent(playerFullInfoURL);
-                if (resJsonString == null)
-                    throw new Exception("Player full info get error");
-                this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.Error(ex.ToString());
-                this._playerInfoGetActive = false;
-                return;
-            }
+            await this._scoreSaberPlayerInfo.GetPlayerFullInfoAsync(this._userID);
+            //最終記録が初期値の場合の更新
             if (PluginConfig.Instance.LastTimePlayed == 0)
                 LastUpdateStatisticsData();
             if (PluginConfig.Instance.BeforePP == 0)
             {
-                PluginConfig.Instance.BeforePP = this._playerFullInfo.pp;
-                PluginConfig.Instance.NowPP = this._playerFullInfo.pp;
+                PluginConfig.Instance.BeforePP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+                PluginConfig.Instance.NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
             }
-            if (PluginConfig.Instance.NowPP != this._playerFullInfo.pp)
+            //pp更新時の更新
+            if (PluginConfig.Instance.NowPP != this._scoreSaberPlayerInfo._playerFullInfo.pp)
                 PluginConfig.Instance.BeforePP = PluginConfig.Instance.NowPP;
-            PluginConfig.Instance.NowPP = this._playerFullInfo.pp;
+            PluginConfig.Instance.NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+
+            //サーバエラーで未更新時の初回更新・・・無条件更新してないか？
             if (PluginConfig.Instance.LastPlayerInfoNoGet)
                 LastUpdatePlayerInfo();
-            this._playerInfoGetActive = false;
         }
         public void LastPlayerInfoUpdate()
         {
@@ -88,7 +79,7 @@ namespace PlayerInfoViewer.Models
                 lastGetTime = DateTime.Now.AddYears(-1);
             if (lastGetTime < DateTime.Today.AddHours(PluginConfig.Instance.DateChangeTime))
             {
-                if (this._playerFullInfo == null)
+                if (this._scoreSaberPlayerInfo._playerFullInfo == null)
                 {
                     PluginConfig.Instance.LastPlayerInfoNoGet = true;
                     return;
@@ -111,17 +102,18 @@ namespace PlayerInfoViewer.Models
         {
             PluginConfig.Instance.LastGetTime = DateTime.Now.ToString();
             PluginConfig.Instance.LastPlayerInfoNoGet = false;
-            PluginConfig.Instance.LastPP = this._playerFullInfo.pp;
-            PluginConfig.Instance.LastRank = this._playerFullInfo.rank;
-            PluginConfig.Instance.LastCountryRank = this._playerFullInfo.countryRank;
-            PluginConfig.Instance.LastTotalScore = this._playerFullInfo.scoreStats.totalScore;
-            PluginConfig.Instance.LastTotalRankedScore = this._playerFullInfo.scoreStats.totalRankedScore;
-            PluginConfig.Instance.LastAverageRankedAccuracy = this._playerFullInfo.scoreStats.averageRankedAccuracy;
-            PluginConfig.Instance.LastTotalPlayCount = this._playerFullInfo.scoreStats.totalPlayCount;
-            PluginConfig.Instance.LastRankedPlayCount = this._playerFullInfo.scoreStats.rankedPlayCount;
-            PluginConfig.Instance.LastReplaysWatched = this._playerFullInfo.scoreStats.replaysWatched;
-            PluginConfig.Instance.BeforePP = this._playerFullInfo.pp;
-            PluginConfig.Instance.NowPP = this._playerFullInfo.pp;
+            var playerFullInfo = this._scoreSaberPlayerInfo._playerFullInfo;
+            PluginConfig.Instance.LastPP = playerFullInfo.pp;
+            PluginConfig.Instance.LastRank = playerFullInfo.rank;
+            PluginConfig.Instance.LastCountryRank = playerFullInfo.countryRank;
+            PluginConfig.Instance.LastTotalScore = playerFullInfo.scoreStats.totalScore;
+            PluginConfig.Instance.LastTotalRankedScore = playerFullInfo.scoreStats.totalRankedScore;
+            PluginConfig.Instance.LastAverageRankedAccuracy = playerFullInfo.scoreStats.averageRankedAccuracy;
+            PluginConfig.Instance.LastTotalPlayCount = playerFullInfo.scoreStats.totalPlayCount;
+            PluginConfig.Instance.LastRankedPlayCount = playerFullInfo.scoreStats.rankedPlayCount;
+            PluginConfig.Instance.LastReplaysWatched = playerFullInfo.scoreStats.replaysWatched;
+            PluginConfig.Instance.BeforePP = playerFullInfo.pp;
+            PluginConfig.Instance.NowPP = playerFullInfo.pp;
         }
         public void LastUpdateStatisticsData()
         {
