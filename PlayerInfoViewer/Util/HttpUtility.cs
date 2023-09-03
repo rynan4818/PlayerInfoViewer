@@ -6,12 +6,13 @@ namespace PlayerInfoViewer.Util
 {
     public static class HttpUtility
     {
-        public static async Task<string> GetHttpContent(HttpClient HttpClient, string url)
+        public static readonly HttpClient httpClient = new HttpClient();
+        public static async Task<string> GetHttpContent(string url)
         {
             HttpResponseMessage response;
             try
             {
-                response = await HttpClient.GetAsync(url);
+                response = await httpClient.GetAsync(url);
             }
             catch (HttpRequestException)
             {

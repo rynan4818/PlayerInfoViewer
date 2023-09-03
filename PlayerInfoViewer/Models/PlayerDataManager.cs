@@ -4,7 +4,6 @@ using System;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Zenject;
-using System.Net.Http;
 
 namespace PlayerInfoViewer.Models
 {
@@ -14,7 +13,6 @@ namespace PlayerInfoViewer.Models
         private readonly PlayerDataModel _playerDataModel;
         private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRankingJson _rankingData;
-        public static readonly HttpClient ScoresaberHttpClient = new HttpClient();
         public bool _playerInfoGetActive = false;
         public string _userID;
         public PlayerFullInfoJson _playerFullInfo;
@@ -58,7 +56,7 @@ namespace PlayerInfoViewer.Models
             var playerFullInfoURL = $"https://scoresaber.com/api/player/{_userID}/full";
             try
             {
-                var resJsonString = await HttpUtility.GetHttpContent(ScoresaberHttpClient, playerFullInfoURL);
+                var resJsonString = await HttpUtility.GetHttpContent(playerFullInfoURL);
                 if (resJsonString == null)
                     throw new Exception("Player full info get error");
                 this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
