@@ -6,7 +6,7 @@ using PlayerInfoViewer.Util;
 
 namespace PlayerInfoViewer.Models
 {
-    public class ScoreSaberRankingJson
+    public class ScoreSaberRanking
     {
         public ScoreSaberRankingIndexJson _rankingIndex;
         public ScoreSaberRankingDataJson _rankingData;

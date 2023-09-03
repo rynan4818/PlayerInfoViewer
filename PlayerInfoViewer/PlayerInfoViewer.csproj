@@ -137,8 +137,8 @@
     <Compile Include="Installers\PlayerInfoMenuInstaller.cs" />
     <Compile Include="Models\HDTDataJson.cs" />
     <Compile Include="Models\PlayerDataManager.cs" />
-    <Compile Include="Models\PlayerInfoFullJson.cs" />
-    <Compile Include="Models\ScoreSaberRankingJson.cs" />
+    <Compile Include="Models\ScoreSaberPlayerInfo.cs" />
+    <Compile Include="Models\ScoreSaberRanking.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HttpUtility.cs" />

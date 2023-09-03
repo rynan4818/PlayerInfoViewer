@@ -12,14 +12,14 @@ namespace PlayerInfoViewer.Models
         private readonly IPlatformUserModel _userModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly HDTDataJson _hdtData;
-        private readonly ScoreSaberRankingJson _rankingData;
+        private readonly ScoreSaberRanking _rankingData;
         public bool _playerInfoGetActive = false;
         public string _userID;
         public PlayerFullInfoJson _playerFullInfo;
         public event Action OnPlayerDataInitFinish;
         public bool _initFinish = false;
 
-        public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, HDTDataJson hdtData, ScoreSaberRankingJson rankingData)
+        public PlayerDataManager(IPlatformUserModel userModel, PlayerDataModel playerDataModel, HDTDataJson hdtData, ScoreSaberRanking rankingData)
         {
             this._userModel = userModel;
             this._playerDataModel = playerDataModel;

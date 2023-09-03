@@ -19,7 +19,7 @@ namespace PlayerInfoViewer.Views
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
         private PlayerDataModel _playerDataModel;
         private PlayerDataManager _playerDataManager;
-        private ScoreSaberRankingJson _rankingData;
+        private ScoreSaberRanking _rankingData;
         private HDTDataJson _hdtDataJson;
         public GameObject rootObject;
         private Canvas _canvas;
@@ -38,7 +38,7 @@ namespace PlayerInfoViewer.Views
 
         //MonoBehaviourはコンストラクタを使えないので、メソッドでインジェクションする
         [Inject]
-        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, HDTDataJson hdtDataJson, ScoreSaberRankingJson rankingData)
+        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, HDTDataJson hdtDataJson, ScoreSaberRanking rankingData)
         {
             this._playerDataManager = playerDataManager;
             this._platformLeaderboardViewController = platformLeaderboardViewController;

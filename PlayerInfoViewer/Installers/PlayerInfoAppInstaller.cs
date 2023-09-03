@@ -9,7 +9,7 @@ namespace PlayerInfoViewer.Installers
         {
             this.Container.BindInterfacesAndSelfTo<PlayerDataManager>().AsSingle().NonLazy();
             this.Container.BindInterfacesAndSelfTo<HDTDataJson>().AsSingle().NonLazy();
-            this.Container.BindInterfacesAndSelfTo<ScoreSaberRankingJson>().AsSingle().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<ScoreSaberRanking>().AsSingle().NonLazy();
         }
     }
 }
