@@ -45,7 +45,7 @@ namespace PlayerInfoViewer
         {
             Log.Info("OnApplicationStart");
             var orginal = AccessTools.Method("CO2Core.Models.CO2CoreManager:UpdateCO2");
-            var postfix = AccessTools.Method(typeof(CO2CoreManagerPatch), "UpdateCO2Postfix");
+            var postfix = AccessTools.Method(typeof(CO2CoreManagerPatch), nameof(CO2CoreManagerPatch.UpdateCO2Postfix));
             if (orginal != null)
             {
                 Log.Debug("CO2CoreManager Patch Load");

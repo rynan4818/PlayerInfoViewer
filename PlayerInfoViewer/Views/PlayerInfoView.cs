@@ -7,6 +7,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using System.Threading.Tasks;
 
 namespace PlayerInfoViewer.Views
 {
@@ -136,7 +137,7 @@ namespace PlayerInfoViewer.Views
         }
         public void PlyerStatisticsChange()
         {
-            if (!PluginConfig.Instance.ViewPlayerStatistics)
+            if (!PluginConfig.Instance.ViewPlayerStatistics || !this._playerDataManager._initFinish)
                 return;
             var allOverallStatsData = this._playerDataModel.playerData.playerAllOverallStatsData.allOverallStatsData;
             if (this.lastPlayed == allOverallStatsData.playedLevelsCount)
@@ -155,7 +156,7 @@ namespace PlayerInfoViewer.Views
         }
         public void OnPlayCountChange()
         {
-            if (!PluginConfig.Instance.ViewPlayCount)
+            if (!PluginConfig.Instance.ViewPlayCount || !this._playerDataManager._initFinish)
                 return;
             if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
             {
@@ -187,7 +188,7 @@ namespace PlayerInfoViewer.Views
         }
         public void OnRankPpChange()
         {
-            if (!PluginConfig.Instance.ViewRankPP)
+            if (!PluginConfig.Instance.ViewRankPP || !this._playerDataManager._initFinish)
                 return;
             if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
             {
@@ -214,14 +215,10 @@ namespace PlayerInfoViewer.Views
             this._co2 = co2data.Item1;
             this._hum = co2data.Item2;
             this._tmp = co2data.Item3;
-            if (!this._playerDataManager._initFinish)
-                return;
             this.OnRankPpChange();
         }
         public void OnPlayerDataInitFinish()
         {
-            if (!this._playerDataManager._initFinish)
-                return;
             this.PlyerStatisticsChange();
             this.OnPlayCountChange();
             this.OnRankPpChange();
@@ -238,7 +235,11 @@ namespace PlayerInfoViewer.Views
         {
             this.rootObject.SetActive(false);
         }
-        public async void OnScoreUploaded()
+        public void OnScoreUploaded()
+        {
+            _= this.ScoreUploadedAsync();
+        }
+        public async Task ScoreUploadedAsync()
         {
             await this._playerDataManager.GetPlayerInfoAsync();
             await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
