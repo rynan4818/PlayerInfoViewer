@@ -1,24 +1,27 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Settings;
-using BeatSaberMarkupLanguage.ViewControllers;
 using PlayerInfoViewer.Configuration;
+using System;
 using System.Globalization;
 using Zenject;
 
 namespace PlayerInfoViewer.Views
 {
-    [HotReload]
-    public class PlayerInfoSettingView : BSMLAutomaticViewController, IInitializable
+    public class PlayerInfoSettingView : IInitializable, IDisposable
     {
-        public string ResourceName => "PlayerInfoViewer.Views.PlayerInfoSettingView";
-        private static readonly string _buttonName = "PlayerInfoViewer";
+        private bool _disposedValue;
+        public static readonly string _buttonName = "PlayerInfoViewer";
+        public string ResourceName => string.Join(".", this.GetType().Namespace, this.GetType().Name);
         public void Initialize()
         {
             BSMLSettings.instance.AddSettingsMenu(_buttonName, this.ResourceName, this);
         }
-        protected override void OnDestroy()
+        public virtual void Dispose()
         {
+            if (this._disposedValue)
+                return;
             BSMLSettings.instance?.RemoveSettingsMenu(_buttonName);
+            this._disposedValue = true;
         }
         [UIValue("DateChangeTime")]
         public int DateChangeTime
