@@ -15,7 +15,7 @@ namespace PlayerInfoViewer.Models
         public DateTime _dataGetTime = DateTime.Now.AddYears(-1);
         public async Task GetUserRankingAsync(string userID)
         {
-            if (this._getDataActive)
+            if (userID == null || this._getDataActive)
                 return;
             if (this._rankingIndex != null && this._rankingIndex.NextUpdateTime > new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds())
                 return;

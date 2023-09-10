@@ -359,25 +359,26 @@ namespace PlayerInfoViewer.Views
         }
         public void OnScoreUploaded()
         {
+            if (!this._playerDataManager._initFinish)
+                return;
             _= this.ScoreUploadedAsync();
         }
         public async Task ScoreUploadedAsync()
         {
             await this._playerDataManager.GetSSPlayerInfoAsync();
-            await this.RankingUpdateAsync();
+            await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
+            this.OnPlayCountChange();
+            this.OnRankPpChange();
         }
         public void OnBLScoreUploaded()
         {
+            if (!this._playerDataManager._initFinish)
+                return;
             _ = this.BLScoreUploadedAsync();
         }
         public async Task BLScoreUploadedAsync()
         {
             await this._playerDataManager.GetBLPlayerInfoAsync();
-            await this.RankingUpdateAsync();
-        }
-        public async Task RankingUpdateAsync()
-        {
-            await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
             this.OnPlayCountChange();
             this.OnRankPpChange();
         }
