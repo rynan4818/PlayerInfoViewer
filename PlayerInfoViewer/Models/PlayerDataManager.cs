@@ -1,11 +1,10 @@
 ﻿using PlayerInfoViewer.Configuration;
 using System;
 using System.Threading.Tasks;
-using Zenject;
 
 namespace PlayerInfoViewer.Models
 {
-    public class PlayerDataManager : IInitializable
+    public class PlayerDataManager
     {
         private readonly IPlatformUserModel _userModel;
         private readonly PlayerDataModel _playerDataModel;
@@ -14,8 +13,8 @@ namespace PlayerInfoViewer.Models
         private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRanking _rankingData;
         public string _userID;
-        public event Action OnPlayerDataInitFinish;
         public bool _initFinish { get; set; } = false;
+        public bool _initActive = false;
 
         public PlayerDataManager(IPlatformUserModel userModel,
             PlayerDataModel playerDataModel,
@@ -32,18 +31,15 @@ namespace PlayerInfoViewer.Models
             this._beatLeaderPlayerInfo = beatLeaderPlayerInfo;
         }
 
-        public void Initialize()
+        public async Task InitiAsync()
         {
+            if (this._initFinish || this._initActive)
+                return;
+            this._initActive = true;
             Plugin.Log.Debug("PlayerDataManager Initialize");
             this._hdtData.Load();
             if (PluginConfig.Instance.LastTimePlayed == 0)
                 LastUpdateStatisticsData();
-            // async void警察に怒られないようにします(；・∀・) https://light11.hatenadiary.com/entry/2019/03/05/221311
-            _ = this.InitializeAsync();
-        }
-
-        public async Task InitializeAsync()
-        {
             var userInfo = await _userModel.GetUserInfo();
             this._userID = userInfo.platformUserId;
             await this.GetSSPlayerInfoAsync();
@@ -61,7 +57,7 @@ namespace PlayerInfoViewer.Models
             }
             PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
             this._initFinish = true;
-            this.OnPlayerDataInitFinish?.Invoke();
+            this._initActive = false;
         }
         public async Task GetSSPlayerInfoAsync()
         {

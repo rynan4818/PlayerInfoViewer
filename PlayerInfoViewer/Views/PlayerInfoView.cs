@@ -105,19 +105,16 @@ namespace PlayerInfoViewer.Views
             }
             this._platformLeaderboardViewController.didActivateEvent += this.OnLeaderboardActivated;
             this._platformLeaderboardViewController.didDeactivateEvent += this.OnLeaderboardDeactivated;
-            this._playerDataManager.OnPlayerDataInitFinish += this.OnPlayerDataInitFinish;
             CO2CoreManagerPatch.OnCO2Changed += this.OnCO2Changed;
             CustomLeaderboardShowPatch.OnCustomLeaderboardShowed += this.OnCustomLeaderboardShowed;
             CustomLeaderboardHidePatch.OnCustomLeaderboardHidden += this.OnCustomLeaderboardHidden;
             UploadPlayRequestPatch.OnUploadPlayFinished += this.OnBLScoreUploaded;
             UploadReplayRequestPatch.OnUploadReplayFinished += this.OnBLScoreUploaded;
-            this.OnPlayerDataInitFinish();
             this.rootObject.SetActive(false);
         }
         private void OnDestroy()
         {
             Plugin.Log.Debug("PlayerInfoView Destroy");
-            this._playerDataManager.OnPlayerDataInitFinish -= this.OnPlayerDataInitFinish;
             this._platformLeaderboardViewController.didDeactivateEvent -= this.OnLeaderboardDeactivated;
             this._platformLeaderboardViewController.didActivateEvent -= this.OnLeaderboardActivated;
             CO2CoreManagerPatch.OnCO2Changed -= this.OnCO2Changed;
@@ -337,17 +334,24 @@ namespace PlayerInfoViewer.Views
             this._tmp = co2data.Item3;
             this.OnRankPpChange();
         }
-        public void OnPlayerDataInitFinish()
-        {
-            this.PlyerStatisticsChange();
-            this.OnPlayCountChange();
-            this.OnRankPpChange();
-        }
         public void OnLeaderboardActivated(bool firstactivation, bool addedtohierarchy, bool screensystemenabling)
         {
+            // async void警察に怒られないようにします(；・∀・) https://light11.hatenadiary.com/entry/2019/03/05/221311
+            _ = LeaderboardActivatedAsync();
+        }
+        public async Task LeaderboardActivatedAsync()
+        {
             this.rootObject.SetActive(true);
-            this.PlyerStatisticsChange();
+            if (!this._playerDataManager._initActive || !this._playerDataManager._initFinish)
+            {
+                await this._playerDataManager.InitiAsync();
+                this.OnPlayCountChange();
+                this.OnRankPpChange();
+            }
             this._hdtDataJson.Load();
+            this.PlyerStatisticsChange();
+            if (!this._playerDataManager._initFinish)
+                return;
             if (!this._scoreSaberPlayerInfo._playerInfoGetActive && (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null))
                 this.OnScoreUploaded();
             if (!this._beatLeaderPlayerInfo._playerInfoGetActive && (this._beatLeaderPlayerInfo._playerInfo == null || this._beatLeaderPlayerInfo._playerInfo.id == null))
@@ -361,7 +365,7 @@ namespace PlayerInfoViewer.Views
         {
             if (!this._playerDataManager._initFinish)
                 return;
-            _= this.ScoreUploadedAsync();
+            _ = this.ScoreUploadedAsync();
         }
         public async Task ScoreUploadedAsync()
         {
