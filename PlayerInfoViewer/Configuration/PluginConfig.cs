@@ -37,6 +37,16 @@ namespace PlayerInfoViewer.Configuration
         public virtual float LastHeadDistanceTravelled { get; set; } = 0;
         public virtual float BeforePP { get; set; } = 0;
         public virtual float NowPP { get; set; } = 0;
+        public virtual bool LastBLPlayerInfoNoGet { get; set; } = false;  //前回記録のBeatLeader記録が取得できなかったとき
+        public virtual string LastBLGetTime { get; set; } = null;  //前回記録のBeatLeader取得時間
+        public virtual float LastBLPP { get; set; } = 0;
+        public virtual int LastBLRank { get; set; } = 0;
+        public virtual int LastBLCountryRank { get; set; } = 0;
+        public virtual int LastBLTotalPlayCount { get; set; } = 0;
+        public virtual int LastBLRankedPlayCount { get; set; } = 0;
+        public virtual float BLBeforePP { get; set; } = 0;
+        public virtual float BLNowPP { get; set; } = 0;
+
         /// <summary>
         /// これは、BSIPAが設定ファイルを読み込むたびに（ファイルの変更が検出されたときを含めて）呼び出されます。
         /// </summary>

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using LeaderboardCore.Models;
+using System;
 
 namespace PlayerInfoViewer.HarmonyPatches
 {
@@ -7,11 +8,10 @@ namespace PlayerInfoViewer.HarmonyPatches
     [HarmonyPatch("Show", MethodType.Normal)]
     public class CustomLeaderboardShowPatch
     {
-        public static string LeaderboardId;
+        public static event Action<string> OnCustomLeaderboardShowed;
         public static void Postfix(object __instance)
         {
-            LeaderboardId = Traverse.Create(__instance).Property("LeaderboardId").GetValue() as string;
-            Plugin.Log.Debug("Show:" + LeaderboardId);
+            OnCustomLeaderboardShowed?.Invoke(Traverse.Create(__instance).Property("LeaderboardId").GetValue() as string);
         }
     }
 }

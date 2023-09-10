@@ -51,6 +51,32 @@ namespace PlayerInfoViewer
                 Log.Debug("CO2CoreManager Patch Load");
                 _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
             }
+            var type = AccessTools.TypeByName("BeatLeader.API.Methods.UploadReplayRequest");
+            if (type != null)
+                type = AccessTools.Inner(type, "UploadWithCookieRequestDescriptor");
+            if (type != null)
+            {
+                orginal = AccessTools.Method(type, "ParseResponse");
+                postfix = AccessTools.Method(typeof(UploadReplayRequestPatch), nameof(UploadReplayRequestPatch.ParseResponsePostfix));
+                if (orginal != null)
+                {
+                    Log.Debug("BeatLeader UploadReplayRequest Patch Load");
+                    _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
+                }
+            }
+            type = AccessTools.TypeByName("BeatLeader.API.Methods.UploadPlayRequest");
+            if (type != null)
+                type = AccessTools.Inner(type, "UploadWithCookieRequestDescriptor");
+            if (type != null)
+            {
+                orginal = AccessTools.Method(type, "ParseResponse");
+                postfix = AccessTools.Method(typeof(UploadPlayRequestPatch), nameof(UploadPlayRequestPatch.ParseResponsePostfix));
+                if (orginal != null)
+                {
+                    Log.Debug("BeatLeader UploadPlayRequest Patch Load");
+                    _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
+                }
+            }
             leaderboardCore = PluginManager.GetPluginFromId("LeaderboardCore");
             if (leaderboardCore == null)
                 leaderboardCore = PluginManager.GetDisabledPluginFromId("LeaderboardCore");

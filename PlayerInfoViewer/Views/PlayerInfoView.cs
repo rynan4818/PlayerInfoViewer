@@ -21,6 +21,7 @@ namespace PlayerInfoViewer.Views
         private PlayerDataModel _playerDataModel;
         private PlayerDataManager _playerDataManager;
         private ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
+        private BeatLeaderPlayerInfo _beatLeaderPlayerInfo;
         private ScoreSaberRanking _rankingData;
         private HDTDataJson _hdtDataJson;
         public GameObject rootObject;
@@ -32,6 +33,7 @@ namespace PlayerInfoViewer.Views
         public int _co2;
         public double _hum;
         public double _tmp;
+        public bool _beatLeaderBoardEnabled = false;
 
         public static readonly Vector2 CanvasSize = new Vector2(100, 50);
         public static readonly Vector3 Scale = new Vector3(0.01f, 0.01f, 0.01f);
@@ -40,7 +42,13 @@ namespace PlayerInfoViewer.Views
 
         //MonoBehaviourはコンストラクタを使えないので、メソッドでインジェクションする
         [Inject]
-        public void Constractor(PlayerDataManager playerDataManager, PlatformLeaderboardViewController platformLeaderboardViewController, PlayerDataModel playerDataModel, ScoreSaberPlayerInfo scoreSaberPlayerInfo, HDTDataJson hdtDataJson, ScoreSaberRanking rankingData)
+        public void Constractor(PlayerDataManager playerDataManager,
+            PlatformLeaderboardViewController platformLeaderboardViewController,
+            PlayerDataModel playerDataModel,
+            ScoreSaberPlayerInfo scoreSaberPlayerInfo,
+            BeatLeaderPlayerInfo beatLeaderPlayerInfo,
+            HDTDataJson hdtDataJson,
+            ScoreSaberRanking rankingData)
         {
             this._playerDataManager = playerDataManager;
             this._platformLeaderboardViewController = platformLeaderboardViewController;
@@ -48,6 +56,7 @@ namespace PlayerInfoViewer.Views
             this._hdtDataJson = hdtDataJson;
             this._rankingData = rankingData;
             this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
+            this._beatLeaderPlayerInfo = beatLeaderPlayerInfo;
         }
         private void Awake()
         {
@@ -97,7 +106,11 @@ namespace PlayerInfoViewer.Views
             this._platformLeaderboardViewController.didActivateEvent += this.OnLeaderboardActivated;
             this._platformLeaderboardViewController.didDeactivateEvent += this.OnLeaderboardDeactivated;
             this._playerDataManager.OnPlayerDataInitFinish += this.OnPlayerDataInitFinish;
-            CO2CoreManagerPatch.OnCO2Changed += this.OnCO2Change;
+            CO2CoreManagerPatch.OnCO2Changed += this.OnCO2Changed;
+            CustomLeaderboardShowPatch.OnCustomLeaderboardShowed += this.OnCustomLeaderboardShowed;
+            CustomLeaderboardHidePatch.OnCustomLeaderboardHidden += this.OnCustomLeaderboardHidden;
+            UploadPlayRequestPatch.OnUploadPlayFinished += this.OnBLScoreUploaded;
+            UploadReplayRequestPatch.OnUploadReplayFinished += this.OnBLScoreUploaded;
             this.OnPlayerDataInitFinish();
             this.rootObject.SetActive(false);
         }
@@ -107,7 +120,11 @@ namespace PlayerInfoViewer.Views
             this._playerDataManager.OnPlayerDataInitFinish -= this.OnPlayerDataInitFinish;
             this._platformLeaderboardViewController.didDeactivateEvent -= this.OnLeaderboardDeactivated;
             this._platformLeaderboardViewController.didActivateEvent -= this.OnLeaderboardActivated;
-            CO2CoreManagerPatch.OnCO2Changed -= this.OnCO2Change;
+            CO2CoreManagerPatch.OnCO2Changed -= this.OnCO2Changed;
+            CustomLeaderboardShowPatch.OnCustomLeaderboardShowed -= this.OnCustomLeaderboardShowed;
+            CustomLeaderboardHidePatch.OnCustomLeaderboardHidden -= this.OnCustomLeaderboardHidden;
+            UploadPlayRequestPatch.OnUploadPlayFinished -= this.OnBLScoreUploaded;
+            UploadReplayRequestPatch.OnUploadReplayFinished -= this.OnBLScoreUploaded;
             Destroy(this.rootObject);
         }
         private CurvedTextMeshPro CreateText(RectTransform parent, string text, Vector2 anchoredPosition)
@@ -158,59 +175,162 @@ namespace PlayerInfoViewer.Views
         {
             if (!PluginConfig.Instance.ViewPlayCount || !this._playerDataManager._initFinish)
                 return;
-            if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
+            if (this._beatLeaderBoardEnabled)
             {
-                this._playCount.color = Color.red;
-                this._playCount.text = " ScoreSaber Error!";
-                return;
+                if (this._beatLeaderPlayerInfo._playerInfoGetActive)
+                    return;
+                if (this._beatLeaderPlayerInfo._playerInfo == null || this._beatLeaderPlayerInfo._playerInfo.id == null)
+                {
+                    this._playCount.color = Color.red;
+                    this._playCount.text = " BeatLeader Access Error!";
+                    return;
+                }
             }
             else
-                this._playCount.color = Color.white;
-            var playCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.totalPlayCount;
-            var rankedPlayCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.rankedPlayCount;
-            var todayPlayCount = String.Format("{0:+#;-#;#}", playCount - PluginConfig.Instance.LastTotalPlayCount);
-            var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - PluginConfig.Instance.LastRankedPlayCount);
-            var totalPlayCountRankObject = this._rankingData.GetRankingData("TotalPlayCountRank");
+            {
+                if (this._scoreSaberPlayerInfo._playerInfoGetActive)
+                    return;
+                if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
+                {
+                    this._playCount.color = Color.red;
+                    this._playCount.text = " ScoreSaber Access Error!";
+                    return;
+                }
+            }
+            this._playCount.color = Color.white;
+            int playCount;
+            int lastPlayCount;
+            int rankedPlayCount;
+            int lastRankedPlayCount;
+            string leaderBoard = "";
+            if (this._beatLeaderBoardEnabled)
+            {
+                playCount = this._beatLeaderPlayerInfo._playerInfo.scoreStats.totalPlayCount;
+                rankedPlayCount = this._beatLeaderPlayerInfo._playerInfo.scoreStats.rankedPlayCount;
+                lastPlayCount = PluginConfig.Instance.LastBLTotalPlayCount;
+                lastRankedPlayCount = PluginConfig.Instance.LastBLRankedPlayCount;
+                leaderBoard = "BeatLeader ";
+            }
+            else
+            {
+                playCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.totalPlayCount;
+                rankedPlayCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.rankedPlayCount;
+                lastPlayCount = PluginConfig.Instance.LastTotalPlayCount;
+                lastRankedPlayCount = PluginConfig.Instance.LastRankedPlayCount;
+            }
+            var todayPlayCount = String.Format("{0:+#;-#;#}", playCount - lastPlayCount);
+            var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - lastRankedPlayCount);
             string totalPlayCountRank = "";
-            if (totalPlayCountRankObject != null)
-                totalPlayCountRank = $"   #{totalPlayCountRankObject}";
-            var totalPlayCountLocalRankObject = this._rankingData.GetRankingData("TotalPlayCountLocalRank");
-            if (totalPlayCountLocalRankObject != null)
-                totalPlayCountRank += $"/#{totalPlayCountLocalRankObject}";
-            var rankedPlayCountRankObject = this._rankingData.GetRankingData("RankedPlayCountRank");
             string rankedPlayCountRank = "";
-            if (rankedPlayCountRankObject != null)
-                rankedPlayCountRank = $"   #{rankedPlayCountRankObject}";
-            var rankedPlayCountLocalRankObject = this._rankingData.GetRankingData("RankedPlayCountLocalRank");
-            if (rankedPlayCountLocalRankObject != null)
-                rankedPlayCountRank += $"/#{rankedPlayCountLocalRankObject}";
-            this._playCount.text = $"Play Count    Total : {playCount} {todayPlayCount}{totalPlayCountRank}    Ranked : {rankedPlayCount} {todayRankedPlayCount}{rankedPlayCountRank}";
+            if (this._beatLeaderBoardEnabled ==  false)
+            {
+                var totalPlayCountRankObject = this._rankingData.GetRankingData("TotalPlayCountRank");
+                if (totalPlayCountRankObject != null)
+                    totalPlayCountRank = $"   #{totalPlayCountRankObject}";
+                var totalPlayCountLocalRankObject = this._rankingData.GetRankingData("TotalPlayCountLocalRank");
+                if (totalPlayCountLocalRankObject != null)
+                    totalPlayCountRank += $"/#{totalPlayCountLocalRankObject}";
+                var rankedPlayCountRankObject = this._rankingData.GetRankingData("RankedPlayCountRank");
+                if (rankedPlayCountRankObject != null)
+                    rankedPlayCountRank = $"   #{rankedPlayCountRankObject}";
+                var rankedPlayCountLocalRankObject = this._rankingData.GetRankingData("RankedPlayCountLocalRank");
+                if (rankedPlayCountLocalRankObject != null)
+                    rankedPlayCountRank += $"/#{rankedPlayCountLocalRankObject}";
+            }
+            this._playCount.text = $"{leaderBoard}Play Count    Total : {playCount} {todayPlayCount}{totalPlayCountRank}    Ranked : {rankedPlayCount} {todayRankedPlayCount}{rankedPlayCountRank}";
         }
         public void OnRankPpChange()
         {
             if (!PluginConfig.Instance.ViewRankPP || !this._playerDataManager._initFinish)
                 return;
-            if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
+            if (this._beatLeaderBoardEnabled)
             {
-                this._rankPP.color = Color.red;
-                this._rankPP.text = " ScoreSaber Error!";
-                return;
+                if (this._beatLeaderPlayerInfo._playerInfoGetActive)
+                    return;
+                if (this._beatLeaderPlayerInfo._playerInfo == null || this._beatLeaderPlayerInfo._playerInfo.id == null)
+                {
+                    this._rankPP.color = Color.red;
+                    this._rankPP.text = " BeatLeader Access Error!";
+                    return;
+                }
             }
             else
-                this._rankPP.color = Color.white;
-            var pp = this._scoreSaberPlayerInfo._playerFullInfo.pp;
-            var localRank = this._scoreSaberPlayerInfo._playerFullInfo.countryRank;
-            var rank = this._scoreSaberPlayerInfo._playerFullInfo.rank;
-            var todayRankUp = String.Format("{0:+#;-#;+0}", PluginConfig.Instance.LastRank - rank);
-            var todayLocalRankUp = String.Format("{0:+#;-#;#}", PluginConfig.Instance.LastCountryRank - localRank);
-            var todayPpUp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(pp - PluginConfig.Instance.LastPP, 2, MidpointRounding.AwayFromZero));
-            var lastChangePp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(PluginConfig.Instance.NowPP - PluginConfig.Instance.BeforePP, 2, MidpointRounding.AwayFromZero));
-            var text = $"Global : {todayRankUp}    Local : #{localRank} {todayLocalRankUp}    Today : {todayPpUp}pp  Last : {lastChangePp}pp";
+            {
+                if (this._scoreSaberPlayerInfo._playerInfoGetActive)
+                    return;
+                if (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null)
+                {
+                    this._rankPP.color = Color.red;
+                    this._rankPP.text = " ScoreSaber Access Error!";
+                    return;
+                }
+            }
+            this._rankPP.color = Color.white;
+            float pp;
+            int localRank;
+            string localRankText;
+            int rank;
+            int lastRank;
+            int lastCountryRank;
+            float lastPP;
+            float nowPP;
+            float beforePP;
+            if (this._beatLeaderBoardEnabled)
+            {
+                pp = this._beatLeaderPlayerInfo._playerInfo.pp;
+                localRank = this._beatLeaderPlayerInfo._playerInfo.countryRank;
+                localRankText = "";
+                rank = this._beatLeaderPlayerInfo._playerInfo.rank;
+                lastRank = PluginConfig.Instance.LastBLRank;
+                lastCountryRank = PluginConfig.Instance.LastBLCountryRank;
+                lastPP = PluginConfig.Instance.LastBLPP;
+                nowPP = PluginConfig.Instance.BLNowPP;
+                beforePP = PluginConfig.Instance.BLBeforePP;
+            }
+            else
+            {
+                pp = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+                localRank = this._scoreSaberPlayerInfo._playerFullInfo.countryRank;
+                localRankText = $"#{localRank} ";
+                rank = this._scoreSaberPlayerInfo._playerFullInfo.rank;
+                lastRank = PluginConfig.Instance.LastRank;
+                lastCountryRank = PluginConfig.Instance.LastCountryRank;
+                lastPP = PluginConfig.Instance.LastPP;
+                nowPP = PluginConfig.Instance.NowPP;
+                beforePP = PluginConfig.Instance.BeforePP;
+            }
+            var todayRankUp = String.Format("{0:+#;-#;+0}", lastRank - rank);
+            var todayLocalRankUp = String.Format("{0:+#;-#;+0}", lastCountryRank - localRank);
+            var todayPpUp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(pp - lastPP, 2, MidpointRounding.AwayFromZero));
+            var lastChangePp = String.Format("{0:+0.##;-0.##;+0.##}", Math.Round(nowPP - beforePP, 2, MidpointRounding.AwayFromZero));
+            var text = $"Global : {todayRankUp}    Local : {localRankText}{todayLocalRankUp}    Today : {todayPpUp}pp  Last : {lastChangePp}pp";
             if (CO2CoreManagerPatch.Enable)
                 text += $"    {this._co2}ppm  {this._tmp}℃  {this._hum}%";
             this._rankPP.text = text;
         }
-        public void OnCO2Change((int, double, double) co2data)
+        public void CustomLeaderboardChanged(string leaderboardId, bool show)
+        {
+            bool beatLeaderBoard;
+            if (show && leaderboardId == "BeatLeader")
+                beatLeaderBoard = true;
+            else
+                beatLeaderBoard = false;
+            if (beatLeaderBoard != _beatLeaderBoardEnabled)
+            {
+                _beatLeaderBoardEnabled = beatLeaderBoard;
+                this.OnPlayCountChange();
+                this.OnRankPpChange();
+            }
+        }
+        public void OnCustomLeaderboardShowed(string leaderboardId)
+        {
+            CustomLeaderboardChanged(leaderboardId, true);
+        }
+        public void OnCustomLeaderboardHidden(string leaderboardId)
+        {
+            CustomLeaderboardChanged(leaderboardId, false);
+        }
+        public void OnCO2Changed((int, double, double) co2data)
         {
             this._co2 = co2data.Item1;
             this._hum = co2data.Item2;
@@ -228,8 +348,10 @@ namespace PlayerInfoViewer.Views
             this.rootObject.SetActive(true);
             this.PlyerStatisticsChange();
             this._hdtDataJson.Load();
-            if ((this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null) && !this._scoreSaberPlayerInfo._playerInfoGetActive)
+            if (!this._scoreSaberPlayerInfo._playerInfoGetActive && (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null))
                 this.OnScoreUploaded();
+            if (!this._beatLeaderPlayerInfo._playerInfoGetActive && (this._beatLeaderPlayerInfo._playerInfo == null || this._beatLeaderPlayerInfo._playerInfo.id == null))
+                this.OnBLScoreUploaded();
         }
         public void OnLeaderboardDeactivated(bool removedFromHierarchy, bool screenSystemDisabling)
         {
@@ -241,7 +363,20 @@ namespace PlayerInfoViewer.Views
         }
         public async Task ScoreUploadedAsync()
         {
-            await this._playerDataManager.GetPlayerInfoAsync();
+            await this._playerDataManager.GetSSPlayerInfoAsync();
+            await this.RankingUpdateAsync();
+        }
+        public void OnBLScoreUploaded()
+        {
+            _ = this.BLScoreUploadedAsync();
+        }
+        public async Task BLScoreUploadedAsync()
+        {
+            await this._playerDataManager.GetBLPlayerInfoAsync();
+            await this.RankingUpdateAsync();
+        }
+        public async Task RankingUpdateAsync()
+        {
             await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
             this.OnPlayCountChange();
             this.OnRankPpChange();

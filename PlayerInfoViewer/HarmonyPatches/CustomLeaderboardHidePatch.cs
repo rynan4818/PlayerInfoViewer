@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using LeaderboardCore.Models;
+using System;
 
 namespace PlayerInfoViewer.HarmonyPatches
 {
@@ -7,10 +8,10 @@ namespace PlayerInfoViewer.HarmonyPatches
     [HarmonyPatch("Hide", MethodType.Normal)]
     public class CustomLeaderboardHidePatch
     {
+        public static event Action<string> OnCustomLeaderboardHidden;
         public static void Postfix(object __instance)
         {
-            CustomLeaderboardShowPatch.LeaderboardId = Traverse.Create(__instance).Property("LeaderboardId").GetValue() as string;
-            Plugin.Log.Debug("Hide:" + CustomLeaderboardShowPatch.LeaderboardId);
+            OnCustomLeaderboardHidden?.Invoke(Traverse.Create(__instance).Property("LeaderboardId").GetValue() as string);
         }
     }
 }

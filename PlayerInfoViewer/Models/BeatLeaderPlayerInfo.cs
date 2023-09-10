@@ -1,28 +1,28 @@
 ﻿using Newtonsoft.Json;
-using PlayerInfoViewer.Util;
 using System.Threading.Tasks;
 using System;
-using PlayerInfoViewer.Models.ScoreSaber;
+using PlayerInfoViewer.Util;
+using PlayerInfoViewer.Models.BeatLeader;
 
 namespace PlayerInfoViewer.Models
 {
-    public class ScoreSaberPlayerInfo
+    public class BeatLeaderPlayerInfo
     {
         public bool _playerInfoGetActive = false;
-        public PlayerFullInfoJson _playerFullInfo;
-        public async Task GetPlayerFullInfoAsync(string userID)
+        public PlayerResponseFullJson _playerInfo;
+        public async Task GetPlayerInfoAsync(string userID)
         {
             if (userID == null || this._playerInfoGetActive)
                 return;
             this._playerInfoGetActive = true;
-            this._playerFullInfo = null;
-            var playerFullInfoURL = $"https://scoresaber.com/api/player/{userID}/full";
+            this._playerInfo = null;
+            var playerResponseFullURL = $"https://api.beatleader.xyz/player/{userID}?stats=true&keepOriginalId=false";
             try
             {
-                var resJsonString = await HttpUtility.GetHttpContentAsync(playerFullInfoURL);
+                var resJsonString = await HttpUtility.GetHttpContentAsync(playerResponseFullURL);
                 if (resJsonString == null)
-                    throw new Exception("ScoreSaber Player full info get error");
-                this._playerFullInfo = JsonConvert.DeserializeObject<PlayerFullInfoJson>(resJsonString);
+                    throw new Exception("BeatLeader Player info get error");
+                this._playerInfo = JsonConvert.DeserializeObject<PlayerResponseFullJson>(resJsonString);
             }
             catch (Exception ex)
             {
