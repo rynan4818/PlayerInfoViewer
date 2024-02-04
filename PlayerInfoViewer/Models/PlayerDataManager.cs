@@ -13,7 +13,7 @@ namespace PlayerInfoViewer.Models
         private readonly BeatLeaderPlayerInfo _beatLeaderPlayerInfo;
         private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRanking _rankingData;
-        public string _userID;
+        public string _userID = null;
         public bool _initFinish { get; set; } = false;
         public bool _initActive = false;
 
@@ -37,7 +37,7 @@ namespace PlayerInfoViewer.Models
             if (this._disposedValue)
                 return;
             if (this._initFinish)
-               PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
+               PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayTime = DateTime.Now.ToString();
             this._disposedValue = true;
         }
 
@@ -46,18 +46,20 @@ namespace PlayerInfoViewer.Models
             if (this._initFinish || this._initActive)
                 return;
             this._initActive = true;
-            Plugin.Log.Debug("PlayerDataManager Initialize");
-            this._hdtData.Load();
-            if (PluginConfig.Instance.LastTimePlayed == 0)
-                LastUpdateStatisticsData();
             var userInfo = await _userModel.GetUserInfo();
             this._userID = userInfo.platformUserId;
+            if (!PluginConfig.Instance.UserInfoDatas.ContainsKey(this._userID))
+                PluginConfig.Instance.UserInfoDatas.Add(this._userID, new UserInfoData());
+            Plugin.Log.Debug("PlayerDataManager Initialize");
+            this._hdtData.Load();
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].LastTimePlayed == 0)
+                LastUpdateStatisticsData();
             await this.GetSSPlayerInfoAsync();
             await this.GetBLPlayerInfoAsync();
             await this._rankingData.GetUserRankingAsync(this._userID);
             //日付更新処理
             DateTime lastPlayTime;
-            if (!DateTime.TryParse(PluginConfig.Instance.LastPlayTime, out lastPlayTime))
+            if (!DateTime.TryParse(PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayTime, out lastPlayTime))
                 lastPlayTime = DateTime.Now.AddYears(-1);
             if (DateTime.Now - lastPlayTime >= new TimeSpan(PluginConfig.Instance.IntervalTime, 0, 0))
             {
@@ -65,58 +67,64 @@ namespace PlayerInfoViewer.Models
                 LastSSPlayerInfoUpdate();
                 LastBLPlayerInfoUpdate();
             }
-            PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
+            PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayTime = DateTime.Now.ToString();
             this._initFinish = true;
             this._initActive = false;
         }
         public async Task GetSSPlayerInfoAsync()
         {
+            if (this._userID == null)
+                return;
             await this._scoreSaberPlayerInfo.GetPlayerFullInfoAsync(this._userID);
             if (this._scoreSaberPlayerInfo._playerFullInfo == null)
                 return;
             //最終記録が初期値の場合
-            if (PluginConfig.Instance.BeforePP == 0)
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].BeforePP == 0)
             {
-                PluginConfig.Instance.BeforePP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
-                PluginConfig.Instance.NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+                PluginConfig.Instance.UserInfoDatas[this._userID].BeforePP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+                PluginConfig.Instance.UserInfoDatas[this._userID].NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
             }
             //pp更新時
-            if (PluginConfig.Instance.NowPP != this._scoreSaberPlayerInfo._playerFullInfo.pp)
-                PluginConfig.Instance.BeforePP = PluginConfig.Instance.NowPP;
-            PluginConfig.Instance.NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].NowPP != this._scoreSaberPlayerInfo._playerFullInfo.pp)
+                PluginConfig.Instance.UserInfoDatas[this._userID].BeforePP = PluginConfig.Instance.UserInfoDatas[this._userID].NowPP;
+            PluginConfig.Instance.UserInfoDatas[this._userID].NowPP = this._scoreSaberPlayerInfo._playerFullInfo.pp;
             //サーバエラーで最終記録が未更新時に更新可能になった場合
-            if (PluginConfig.Instance.LastPlayerInfoNoGet)
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayerInfoNoGet)
                 LastSSUpdatePlayerInfo();
         }
         public async Task GetBLPlayerInfoAsync()
         {
+            if (this._userID == null)
+                return;
             await this._beatLeaderPlayerInfo.GetPlayerInfoAsync(this._userID);
             if (this._beatLeaderPlayerInfo._playerInfo == null)
                 return;
             //最終記録が初期値の場合
-            if (PluginConfig.Instance.BLBeforePP == 0)
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].BLBeforePP == 0)
             {
-                PluginConfig.Instance.BLBeforePP = this._beatLeaderPlayerInfo._playerInfo.pp;
-                PluginConfig.Instance.BLNowPP = this._beatLeaderPlayerInfo._playerInfo.pp;
+                PluginConfig.Instance.UserInfoDatas[this._userID].BLBeforePP = this._beatLeaderPlayerInfo._playerInfo.pp;
+                PluginConfig.Instance.UserInfoDatas[this._userID].BLNowPP = this._beatLeaderPlayerInfo._playerInfo.pp;
             }
             //pp更新時
-            if (PluginConfig.Instance.BLNowPP != this._beatLeaderPlayerInfo._playerInfo.pp)
-                PluginConfig.Instance.BLBeforePP = PluginConfig.Instance.BLNowPP;
-            PluginConfig.Instance.BLNowPP = this._beatLeaderPlayerInfo._playerInfo.pp;
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].BLNowPP != this._beatLeaderPlayerInfo._playerInfo.pp)
+                PluginConfig.Instance.UserInfoDatas[this._userID].BLBeforePP = PluginConfig.Instance.UserInfoDatas[this._userID].BLNowPP;
+            PluginConfig.Instance.UserInfoDatas[this._userID].BLNowPP = this._beatLeaderPlayerInfo._playerInfo.pp;
             //サーバエラーで最終記録が未更新時に更新可能になった場合
-            if (PluginConfig.Instance.LastBLPlayerInfoNoGet)
+            if (PluginConfig.Instance.UserInfoDatas[this._userID].LastBLPlayerInfoNoGet)
                 LastBLUpdatePlayerInfo();
         }
         public void LastSSPlayerInfoUpdate()
         {
+            if (this._userID == null)
+                return;
             DateTime lastGetTime;
-            if (!DateTime.TryParse(PluginConfig.Instance.LastGetTime, out lastGetTime))
+            if (!DateTime.TryParse(PluginConfig.Instance.UserInfoDatas[this._userID].LastGetTime, out lastGetTime))
                 lastGetTime = DateTime.Now.AddYears(-1);
             if (lastGetTime < DateTime.Today.AddHours(PluginConfig.Instance.DateChangeTime))
             {
                 if (this._scoreSaberPlayerInfo._playerFullInfo == null)
                 {
-                    PluginConfig.Instance.LastPlayerInfoNoGet = true;
+                    PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayerInfoNoGet = true;
                     return;
                 }
                 LastSSUpdatePlayerInfo();
@@ -124,14 +132,16 @@ namespace PlayerInfoViewer.Models
         }
         public void LastBLPlayerInfoUpdate()
         {
+            if (this._userID == null)
+                return;
             DateTime lastGetTime;
-            if (!DateTime.TryParse(PluginConfig.Instance.LastBLGetTime, out lastGetTime))
+            if (!DateTime.TryParse(PluginConfig.Instance.UserInfoDatas[this._userID].LastBLGetTime, out lastGetTime))
                 lastGetTime = DateTime.Now.AddYears(-1);
             if (lastGetTime < DateTime.Today.AddHours(PluginConfig.Instance.DateChangeTime))
             {
                 if (this._beatLeaderPlayerInfo._playerInfo == null)
                 {
-                    PluginConfig.Instance.LastBLPlayerInfoNoGet = true;
+                    PluginConfig.Instance.UserInfoDatas[this._userID].LastBLPlayerInfoNoGet = true;
                     return;
                 }
                 LastBLUpdatePlayerInfo();
@@ -139,19 +149,23 @@ namespace PlayerInfoViewer.Models
         }
         public void LastPlayerStatisticsUpdate()
         {
+            if (this._userID == null)
+                return;
             DateTime lastGetStatisticsTime;
-            if (!DateTime.TryParse(PluginConfig.Instance.LastGetStatisticsTime, out lastGetStatisticsTime))
+            if (!DateTime.TryParse(PluginConfig.Instance.UserInfoDatas[this._userID].LastGetStatisticsTime, out lastGetStatisticsTime))
                 lastGetStatisticsTime = DateTime.Now.AddYears(-1);
             if (lastGetStatisticsTime < DateTime.Today.AddHours(PluginConfig.Instance.DateChangeTime))
             {
-                PluginConfig.Instance.LastGetStatisticsTime = DateTime.Now.ToString();
+                PluginConfig.Instance.UserInfoDatas[this._userID].LastGetStatisticsTime = DateTime.Now.ToString();
                 LastUpdateStatisticsData();
             }
         }
         public void LastSSUpdatePlayerInfo()
         {
+            if (this._userID == null)
+                return;
             var playerFullInfo = this._scoreSaberPlayerInfo._playerFullInfo;
-            var config = PluginConfig.Instance;
+            var config = PluginConfig.Instance.UserInfoDatas[this._userID];
             config.LastGetTime = DateTime.Now.ToString();
             config.LastPlayerInfoNoGet = false;
             config.LastPP = playerFullInfo.pp;
@@ -168,8 +182,10 @@ namespace PlayerInfoViewer.Models
         }
         public void LastBLUpdatePlayerInfo()
         {
+            if (this._userID == null)
+                return;
             var playerInfo = this._beatLeaderPlayerInfo._playerInfo;
-            var config = PluginConfig.Instance;
+            var config = PluginConfig.Instance.UserInfoDatas[this._userID];
             config.LastBLGetTime = DateTime.Now.ToString();
             config.LastBLPlayerInfoNoGet = false;
             config.LastBLPP = playerInfo.pp;
@@ -182,8 +198,10 @@ namespace PlayerInfoViewer.Models
         }
         public void LastUpdateStatisticsData()
         {
+            if (this._userID == null)
+                return;
             var allOverallStatsData = this._playerDataModel.playerData.playerAllOverallStatsData.allOverallStatsData;
-            var config = PluginConfig.Instance;
+            var config = PluginConfig.Instance.UserInfoDatas[this._userID];
             config.LastPlayedLevelsCount = allOverallStatsData.playedLevelsCount;
             config.LastClearedLevelsCount = allOverallStatsData.clearedLevelsCount;
             config.LastFailedLevelsCount = allOverallStatsData.failedLevelsCount;

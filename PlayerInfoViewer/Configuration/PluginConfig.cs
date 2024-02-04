@@ -1,5 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using IPA.Config.Stores;
+using IPA.Config.Stores.Attributes;
+using IPA.Config.Stores.Converters;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace PlayerInfoViewer.Configuration
@@ -15,6 +18,36 @@ namespace PlayerInfoViewer.Configuration
         public virtual bool ViewPlayerStatistics { get; set; } = true;
         public virtual float ViewFontSize { get; set; } = 12f;
         public virtual float ViewYoffset { get; set; } = 0;
+        [UseConverter(typeof(DictionaryConverter<UserInfoData>))]
+        public virtual Dictionary<string, UserInfoData> UserInfoDatas { get; set; } = new Dictionary<string, UserInfoData>();
+
+        /// <summary>
+        /// これは、BSIPAが設定ファイルを読み込むたびに（ファイルの変更が検出されたときを含めて）呼び出されます。
+        /// </summary>
+        public virtual void OnReload()
+        {
+            // 設定ファイルを読み込んだ後の処理を行う。
+        }
+
+        /// <summary>
+        /// これを呼び出すと、BSIPAに設定ファイルの更新を強制します。 これは、ファイルが変更されたことをBSIPAが検出した場合にも呼び出されます。
+        /// </summary>
+        public virtual void Changed()
+        {
+            // 設定が変更されたときに何かをします。
+        }
+
+        /// <summary>
+        /// これを呼び出して、BSIPAに値を<paramref name ="other"/>からこの構成にコピーさせます。
+        /// </summary>
+        public virtual void CopyFrom(PluginConfig other)
+        {
+            // このインスタンスのメンバーは他から移入されました
+        }
+    }
+
+    public class  UserInfoData
+    {
         public virtual string LastPlayTime { get; set; } = null; //最後に起動した時間
         public virtual bool LastPlayerInfoNoGet { get; set; } = false;  //前回記録のScoreSaber記録が取得できなかったとき
         public virtual string LastGetTime { get; set; } = null;  //前回記録のScoreSaber取得時間
@@ -46,29 +79,5 @@ namespace PlayerInfoViewer.Configuration
         public virtual int LastBLRankedPlayCount { get; set; } = 0;
         public virtual float BLBeforePP { get; set; } = 0;
         public virtual float BLNowPP { get; set; } = 0;
-
-        /// <summary>
-        /// これは、BSIPAが設定ファイルを読み込むたびに（ファイルの変更が検出されたときを含めて）呼び出されます。
-        /// </summary>
-        public virtual void OnReload()
-        {
-            // 設定ファイルを読み込んだ後の処理を行う。
-        }
-
-        /// <summary>
-        /// これを呼び出すと、BSIPAに設定ファイルの更新を強制します。 これは、ファイルが変更されたことをBSIPAが検出した場合にも呼び出されます。
-        /// </summary>
-        public virtual void Changed()
-        {
-            // 設定が変更されたときに何かをします。
-        }
-
-        /// <summary>
-        /// これを呼び出して、BSIPAに値を<paramref name ="other"/>からこの構成にコピーさせます。
-        /// </summary>
-        public virtual void CopyFrom(PluginConfig other)
-        {
-            // このインスタンスのメンバーは他から移入されました
-        }
     }
 }

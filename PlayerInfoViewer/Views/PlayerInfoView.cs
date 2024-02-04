@@ -151,25 +151,30 @@ namespace PlayerInfoViewer.Views
         }
         public void PlyerStatisticsChange()
         {
+            if (this._playerDataManager._userID == null)
+                return;
             if (!PluginConfig.Instance.ViewPlayerStatistics || !this._playerDataManager._initFinish)
                 return;
             var allOverallStatsData = this._playerDataModel.playerData.playerAllOverallStatsData.allOverallStatsData;
             if (this.lastPlayed == allOverallStatsData.playedLevelsCount)
                 return;
             this.lastPlayed = allOverallStatsData.playedLevelsCount;
-            var todayPlayed = String.Format("{0:+0;-0;+0}", allOverallStatsData.playedLevelsCount - PluginConfig.Instance.LastPlayedLevelsCount);
-            var todayCleared = String.Format("{0:+0;-0;+0}", allOverallStatsData.clearedLevelsCount - PluginConfig.Instance.LastClearedLevelsCount);
-            var todayFailed = String.Format("{0:+0;-0;+0}", allOverallStatsData.failedLevelsCount - PluginConfig.Instance.LastFailedLevelsCount);
-            var todayFullCombo = String.Format("{0:+0;-0;+0}", allOverallStatsData.fullComboCount - PluginConfig.Instance.LastFullComboCount);
-            var todayTimePlayed = String.Format("{0:+0.#;-0.#;+0}", (allOverallStatsData.timePlayed - PluginConfig.Instance.LastTimePlayed) / 60f);
-            var todayHandDistanceTravelled = String.Format("{0:+0.#;-0.#;+0}", (float)(allOverallStatsData.handDistanceTravelled - PluginConfig.Instance.LastHandDistanceTravelled) / 1000f);
+            var userdata = PluginConfig.Instance.UserInfoDatas[this._playerDataManager._userID];
+            var todayPlayed = String.Format("{0:+0;-0;+0}", allOverallStatsData.playedLevelsCount - userdata.LastPlayedLevelsCount);
+            var todayCleared = String.Format("{0:+0;-0;+0}", allOverallStatsData.clearedLevelsCount - userdata.LastClearedLevelsCount);
+            var todayFailed = String.Format("{0:+0;-0;+0}", allOverallStatsData.failedLevelsCount - userdata.LastFailedLevelsCount);
+            var todayFullCombo = String.Format("{0:+0;-0;+0}", allOverallStatsData.fullComboCount - userdata.LastFullComboCount);
+            var todayTimePlayed = String.Format("{0:+0.#;-0.#;+0}", (allOverallStatsData.timePlayed - userdata.LastTimePlayed) / 60f);
+            var todayHandDistanceTravelled = String.Format("{0:+0.#;-0.#;+0}", (float)(allOverallStatsData.handDistanceTravelled - userdata.LastHandDistanceTravelled) / 1000f);
             var todayHeadDistanceTravelled = "";
             if (this._hdtDataJson.hdtEnable)
-                todayHeadDistanceTravelled = String.Format("  Head : {0:+0;-0;+0}m", this._hdtDataJson.HeadDistanceTravelled - PluginConfig.Instance.LastHeadDistanceTravelled);
+                todayHeadDistanceTravelled = String.Format("  Head : {0:+0;-0;+0}m", this._hdtDataJson.HeadDistanceTravelled - userdata.LastHeadDistanceTravelled);
             this._playerStatistics.text = $"Play : {todayPlayed}  Clear : {todayCleared}  Fail : {todayFailed}  FC : {todayFullCombo}  Time : {todayTimePlayed}m  Hand : {todayHandDistanceTravelled}km{todayHeadDistanceTravelled}";
         }
         public void OnPlayCountChange()
         {
+            if (this._playerDataManager._userID == null)
+                return;
             if (!PluginConfig.Instance.ViewPlayCount || !this._playerDataManager._initFinish)
                 return;
             if (this._beatLeaderBoardEnabled)
@@ -200,20 +205,21 @@ namespace PlayerInfoViewer.Views
             int rankedPlayCount;
             int lastRankedPlayCount;
             string leaderBoard = "";
+            var userdata = PluginConfig.Instance.UserInfoDatas[this._playerDataManager._userID];
             if (this._beatLeaderBoardEnabled)
             {
                 playCount = this._beatLeaderPlayerInfo._playerInfo.scoreStats.totalPlayCount;
                 rankedPlayCount = this._beatLeaderPlayerInfo._playerInfo.scoreStats.rankedPlayCount;
-                lastPlayCount = PluginConfig.Instance.LastBLTotalPlayCount;
-                lastRankedPlayCount = PluginConfig.Instance.LastBLRankedPlayCount;
+                lastPlayCount = userdata.LastBLTotalPlayCount;
+                lastRankedPlayCount = userdata.LastBLRankedPlayCount;
                 leaderBoard = "BeatLeader ";
             }
             else
             {
                 playCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.totalPlayCount;
                 rankedPlayCount = this._scoreSaberPlayerInfo._playerFullInfo.scoreStats.rankedPlayCount;
-                lastPlayCount = PluginConfig.Instance.LastTotalPlayCount;
-                lastRankedPlayCount = PluginConfig.Instance.LastRankedPlayCount;
+                lastPlayCount = userdata.LastTotalPlayCount;
+                lastRankedPlayCount = userdata.LastRankedPlayCount;
             }
             var todayPlayCount = String.Format("{0:+#;-#;#}", playCount - lastPlayCount);
             var todayRankedPlayCount = String.Format("{0:+#;-#;#}", rankedPlayCount - lastRankedPlayCount);
@@ -238,6 +244,8 @@ namespace PlayerInfoViewer.Views
         }
         public void OnRankPpChange()
         {
+            if (this._playerDataManager._userID == null)
+                return;
             if (!PluginConfig.Instance.ViewRankPP || !this._playerDataManager._initFinish)
                 return;
             if (this._beatLeaderBoardEnabled)
@@ -272,17 +280,18 @@ namespace PlayerInfoViewer.Views
             float lastPP;
             float nowPP;
             float beforePP;
+            var userdata = PluginConfig.Instance.UserInfoDatas[this._playerDataManager._userID];
             if (this._beatLeaderBoardEnabled)
             {
                 pp = this._beatLeaderPlayerInfo._playerInfo.pp;
                 localRank = this._beatLeaderPlayerInfo._playerInfo.countryRank;
                 localRankText = "";
                 rank = this._beatLeaderPlayerInfo._playerInfo.rank;
-                lastRank = PluginConfig.Instance.LastBLRank;
-                lastCountryRank = PluginConfig.Instance.LastBLCountryRank;
-                lastPP = PluginConfig.Instance.LastBLPP;
-                nowPP = PluginConfig.Instance.BLNowPP;
-                beforePP = PluginConfig.Instance.BLBeforePP;
+                lastRank = userdata.LastBLRank;
+                lastCountryRank = userdata.LastBLCountryRank;
+                lastPP = userdata.LastBLPP;
+                nowPP = userdata.BLNowPP;
+                beforePP = userdata.BLBeforePP;
             }
             else
             {
@@ -290,11 +299,11 @@ namespace PlayerInfoViewer.Views
                 localRank = this._scoreSaberPlayerInfo._playerFullInfo.countryRank;
                 localRankText = $"#{localRank} ";
                 rank = this._scoreSaberPlayerInfo._playerFullInfo.rank;
-                lastRank = PluginConfig.Instance.LastRank;
-                lastCountryRank = PluginConfig.Instance.LastCountryRank;
-                lastPP = PluginConfig.Instance.LastPP;
-                nowPP = PluginConfig.Instance.NowPP;
-                beforePP = PluginConfig.Instance.BeforePP;
+                lastRank = userdata.LastRank;
+                lastCountryRank = userdata.LastCountryRank;
+                lastPP = userdata.LastPP;
+                nowPP = userdata.NowPP;
+                beforePP = userdata.BeforePP;
             }
             var todayRankUp = String.Format("{0:+#;-#;+0}", lastRank - rank);
             var todayLocalRankUp = String.Format("{0:+#;-#;+0}", lastCountryRank - localRank);
