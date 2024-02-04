@@ -6,7 +6,6 @@ using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using SiraUtil.Zenject;
-using System;
 using IPALogger = IPA.Logging.Logger;
 using System.Reflection;
 using IPA.Loader;
@@ -20,7 +19,7 @@ namespace PlayerInfoViewer
         public const string HARMONY_ID = "com.github.rynan4818.PlayerInfoViewer";
         internal static Plugin Instance { get; private set; }
         internal static IPALogger Log { get; private set; }
-        internal PluginMetadata leaderboardCore;
+        internal PluginMetadata leaderboardCore { get; private set; }
 
         /// <summary>
         /// IPAによってプラグインが最初にロードされたときに呼び出されます。
@@ -87,7 +86,6 @@ namespace PlayerInfoViewer
         [OnExit]
         public void OnApplicationQuit()
         {
-            PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
             Log.Debug("OnApplicationQuit");
             _harmony?.UnpatchSelf();
         }

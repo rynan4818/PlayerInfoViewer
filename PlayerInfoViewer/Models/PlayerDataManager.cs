@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 
 namespace PlayerInfoViewer.Models
 {
-    public class PlayerDataManager
+    public class PlayerDataManager : IDisposable
     {
+        private bool _disposedValue;
         private readonly IPlatformUserModel _userModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
@@ -29,6 +30,15 @@ namespace PlayerInfoViewer.Models
             this._hdtData = hdtData;
             this._rankingData = rankingData;
             this._beatLeaderPlayerInfo = beatLeaderPlayerInfo;
+        }
+
+        public virtual void Dispose()
+        {
+            if (this._disposedValue)
+                return;
+            if (this._initFinish)
+               PluginConfig.Instance.LastPlayTime = DateTime.Now.ToString();
+            this._disposedValue = true;
         }
 
         public async Task InitiAsync()

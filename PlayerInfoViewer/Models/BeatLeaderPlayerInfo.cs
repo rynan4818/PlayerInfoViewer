@@ -8,8 +8,8 @@ namespace PlayerInfoViewer.Models
 {
     public class BeatLeaderPlayerInfo
     {
-        public bool _playerInfoGetActive = false;
-        public PlayerResponseFullJson _playerInfo;
+        public bool _playerInfoGetActive { get; set; } = false;
+        public PlayerResponseFullJson _playerInfo { get; set; }
         public async Task GetPlayerInfoAsync(string userID)
         {
             if (userID == null || this._playerInfoGetActive)
@@ -27,6 +27,7 @@ namespace PlayerInfoViewer.Models
             catch (Exception ex)
             {
                 Plugin.Log.Error(ex.ToString());
+                this._playerInfo = null;
                 this._playerInfoGetActive = false;
                 return;
             }
