@@ -1,30 +1,31 @@
-﻿using PlayerInfoViewer.Configuration;
+﻿using BS_Utils.Gameplay;
+using PlayerInfoViewer.Configuration;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PlayerInfoViewer.Models
 {
     public class PlayerDataManager : IDisposable
     {
-        private bool _disposedValue;
-        private readonly IPlatformUserModel _userModel;
+        private bool _disposedValue = false;
         private readonly PlayerDataModel _playerDataModel;
         private readonly ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
         private readonly BeatLeaderPlayerInfo _beatLeaderPlayerInfo;
         private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRanking _rankingData;
         public string _userID = null;
+        private readonly CancellationTokenSource connectionClosed = new CancellationTokenSource();
         public bool _initFinish { get; set; } = false;
         public bool _initActive = false;
 
-        public PlayerDataManager(IPlatformUserModel userModel,
+        public PlayerDataManager(
             PlayerDataModel playerDataModel,
             ScoreSaberPlayerInfo scoreSaberPlayerInfo,
             HDTDataJson hdtData,
             ScoreSaberRanking rankingData,
             BeatLeaderPlayerInfo beatLeaderPlayerInfo)
         {
-            this._userModel = userModel;
             this._playerDataModel = playerDataModel;
             this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
             this._hdtData = hdtData;
@@ -38,6 +39,7 @@ namespace PlayerInfoViewer.Models
                 return;
             if (this._initFinish)
                PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayTime = DateTime.Now.ToString();
+            this.connectionClosed.Cancel();
             this._disposedValue = true;
         }
 
@@ -46,8 +48,23 @@ namespace PlayerInfoViewer.Models
             if (this._initFinish || this._initActive)
                 return;
             this._initActive = true;
-            var userInfo = await _userModel.GetUserInfo();
-            this._userID = userInfo.platformUserId;
+            GetUserInfo.UpdateUserInfo();
+            //GetUserInfo.GetUserAsync()を使えばよいけど、BS1.29.1との互換性のためGetUserID()を使用する。
+            //GetUserID()は非推奨なので、1.29.1のサポートを外すときにGetUserAsync()に直す。
+            var token = connectionClosed.Token;
+            try
+            {
+                while (GetUserInfo.GetUserID() == null)
+                {
+                    token.ThrowIfCancellationRequested();
+                    await Task.Delay(10);
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            this._userID = GetUserInfo.GetUserID();
             if (!PluginConfig.Instance.UserInfoDatas.ContainsKey(this._userID))
                 PluginConfig.Instance.UserInfoDatas.Add(this._userID, new UserInfoData());
             Plugin.Log.Debug("PlayerDataManager Initialize");
