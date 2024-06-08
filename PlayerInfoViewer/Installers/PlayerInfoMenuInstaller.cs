@@ -1,4 +1,5 @@
-﻿using PlayerInfoViewer.Views;
+﻿using PlayerInfoViewer.Util;
+using PlayerInfoViewer.Views;
 using Zenject;
 
 namespace PlayerInfoViewer.Installers

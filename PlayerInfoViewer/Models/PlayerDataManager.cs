@@ -14,6 +14,7 @@ namespace PlayerInfoViewer.Models
         private readonly BeatLeaderPlayerInfo _beatLeaderPlayerInfo;
         private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRanking _rankingData;
+        private readonly PlayerHttpStatus _playerHttpStatus;
         public string _userID = null;
         private readonly CancellationTokenSource connectionClosed = new CancellationTokenSource();
         public bool _initFinish { get; set; } = false;
@@ -24,13 +25,15 @@ namespace PlayerInfoViewer.Models
             ScoreSaberPlayerInfo scoreSaberPlayerInfo,
             HDTDataJson hdtData,
             ScoreSaberRanking rankingData,
-            BeatLeaderPlayerInfo beatLeaderPlayerInfo)
+            BeatLeaderPlayerInfo beatLeaderPlayerInfo,
+            PlayerHttpStatus playerHttpStatus)
         {
             this._playerDataModel = playerDataModel;
             this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
             this._hdtData = hdtData;
             this._rankingData = rankingData;
             this._beatLeaderPlayerInfo = beatLeaderPlayerInfo;
+            this._playerHttpStatus = playerHttpStatus;
         }
 
         public virtual void Dispose()
@@ -108,6 +111,7 @@ namespace PlayerInfoViewer.Models
             //サーバエラーで最終記録が未更新時に更新可能になった場合
             if (PluginConfig.Instance.UserInfoDatas[this._userID].LastPlayerInfoNoGet)
                 LastSSUpdatePlayerInfo();
+            this._playerHttpStatus.OnPlayerSend();
         }
         public async Task GetBLPlayerInfoAsync()
         {

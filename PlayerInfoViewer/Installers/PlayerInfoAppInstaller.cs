@@ -1,4 +1,5 @@
 ﻿using PlayerInfoViewer.Models;
+using PlayerInfoViewer.Util;
 using Zenject;
 
 namespace PlayerInfoViewer.Installers
@@ -12,6 +13,7 @@ namespace PlayerInfoViewer.Installers
             this.Container.BindInterfacesAndSelfTo<ScoreSaberRanking>().AsSingle().NonLazy();
             this.Container.BindInterfacesAndSelfTo<ScoreSaberPlayerInfo>().AsSingle().NonLazy();
             this.Container.BindInterfacesAndSelfTo<BeatLeaderPlayerInfo>().AsSingle().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<PlayerHttpStatus>().AsSingle().NonLazy();
         }
     }
 }

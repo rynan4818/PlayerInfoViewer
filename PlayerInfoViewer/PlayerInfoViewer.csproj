@@ -57,6 +57,11 @@
       <HintPath>$(BeatSaberDir)\Plugins\BS_Utils.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="HttpSiraStatus">
+      <HintPath>$(BeatSaberDir)\Plugins\HttpSiraStatus.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="LeaderboardCore">
       <HintPath>$(BeatSaberDir)\Plugins\LeaderboardCore.dll</HintPath>
       <Private>False</Private>
@@ -157,6 +162,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HttpUtility.cs" />
+    <Compile Include="Models\PlayerHttpStatus.cs" />
     <Compile Include="Views\PlayerInfoSettingView.cs" />
     <Compile Include="Views\PlayerInfoView.cs" />
   </ItemGroup>
