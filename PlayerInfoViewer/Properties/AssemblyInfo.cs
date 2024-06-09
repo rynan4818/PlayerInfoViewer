@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PlayerInfoViewer")]
-[assembly: AssemblyCopyright("Copyright ©  2022 Rynan4818")]
+[assembly: AssemblyCopyright("Copyright ©  2024 Rynan4818")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

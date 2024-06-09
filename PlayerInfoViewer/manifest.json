@@ -1,11 +1,11 @@
-﻿{
+{
   "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
   "id": "PlayerInfoViewer",
   "name": "PlayerInfoViewer",
   "author": "Rynan",
   "version": "0.4.3",
   "description": "Showing ScoreSaber player information",
-  "gameVersion": "1.20.0",
+  "gameVersion": "1.37.0",
   "dependsOn": {
     "BSIPA": "^4.2.0",
     "BS Utils": "^1.12.0",
