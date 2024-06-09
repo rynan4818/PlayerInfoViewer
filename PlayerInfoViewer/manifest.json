@@ -3,14 +3,14 @@
   "id": "PlayerInfoViewer",
   "name": "PlayerInfoViewer",
   "author": "Rynan",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Showing ScoreSaber player information",
-  "gameVersion": "1.37.0",
+  "gameVersion": "1.35.0",
   "dependsOn": {
-    "BSIPA": "^4.2.0",
-    "BS Utils": "^1.12.0",
-    "BeatSaberMarkupLanguage": "^1.6.3",
-    "SiraUtil": "^3.0.4",
-    "LeaderboardCore": "^1.2.0"
+    "BSIPA": "^4.3.3",
+    "BS Utils": "^1.14.0",
+    "BeatSaberMarkupLanguage": "^1.10.2",
+    "SiraUtil": "^3.1.7",
+    "LeaderboardCore": "^1.6.0"
   }
 }
