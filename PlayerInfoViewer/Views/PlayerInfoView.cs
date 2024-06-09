@@ -317,7 +317,7 @@ namespace PlayerInfoViewer.Views
         public void CustomLeaderboardChanged(string leaderboardId, bool show)
         {
             bool beatLeaderBoard;
-            if (show && leaderboardId == "BeatLeader")
+            if (show && leaderboardId.Contains("BeatLeader"))
                 beatLeaderBoard = true;
             else
                 beatLeaderBoard = false;
