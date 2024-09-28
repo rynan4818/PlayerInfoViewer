@@ -10,17 +10,22 @@ namespace PlayerInfoViewer.Views
     public class PlayerInfoSettingView : IInitializable, IDisposable
     {
         private bool _disposedValue;
+        private readonly BSMLSettings _bsmlSettings;
         public static readonly string _buttonName = "PlayerInfoViewer";
         public string ResourceName => string.Join(".", this.GetType().Namespace, this.GetType().Name);
+        public PlayerInfoSettingView(BSMLSettings bsmlSettings)
+        {
+            this._bsmlSettings = bsmlSettings;
+        }
         public void Initialize()
         {
-            BSMLSettings.instance.AddSettingsMenu(_buttonName, this.ResourceName, this);
+            this._bsmlSettings.AddSettingsMenu(_buttonName, this.ResourceName, this);
         }
         public virtual void Dispose()
         {
             if (this._disposedValue)
                 return;
-            BSMLSettings.instance?.RemoveSettingsMenu(_buttonName);
+            this._bsmlSettings?.RemoveSettingsMenu(_buttonName);
             this._disposedValue = true;
         }
         [UIValue("DateChangeTime")]
