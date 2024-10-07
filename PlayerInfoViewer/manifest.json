@@ -3,7 +3,7 @@
   "id": "PlayerInfoViewer",
   "name": "PlayerInfoViewer",
   "author": "Rynan",
-  "version": "0.4.5",
+  "version": "0.4.8",
   "description": "Showing ScoreSaber player information",
   "gameVersion": "1.37.4",
   "dependsOn": {
