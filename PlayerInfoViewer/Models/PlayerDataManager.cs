@@ -12,7 +12,6 @@ namespace PlayerInfoViewer.Models
         private readonly PlayerDataModel _playerDataModel;
         private readonly ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
         private readonly BeatLeaderPlayerInfo _beatLeaderPlayerInfo;
-        private readonly HDTDataJson _hdtData;
         private readonly ScoreSaberRanking _rankingData;
         public string _userID = null;
         private readonly CancellationTokenSource connectionClosed = new CancellationTokenSource();
@@ -22,13 +21,11 @@ namespace PlayerInfoViewer.Models
         public PlayerDataManager(
             PlayerDataModel playerDataModel,
             ScoreSaberPlayerInfo scoreSaberPlayerInfo,
-            HDTDataJson hdtData,
             ScoreSaberRanking rankingData,
             BeatLeaderPlayerInfo beatLeaderPlayerInfo)
         {
             this._playerDataModel = playerDataModel;
             this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
-            this._hdtData = hdtData;
             this._rankingData = rankingData;
             this._beatLeaderPlayerInfo = beatLeaderPlayerInfo;
         }
@@ -68,7 +65,6 @@ namespace PlayerInfoViewer.Models
             if (!PluginConfig.Instance.UserInfoDatas.ContainsKey(this._userID))
                 PluginConfig.Instance.UserInfoDatas.Add(this._userID, new UserInfoData());
             Plugin.Log.Debug("PlayerDataManager Initialize");
-            this._hdtData.Load();
             if (PluginConfig.Instance.UserInfoDatas[this._userID].LastTimePlayed == 0)
                 LastUpdateStatisticsData();
             await this.GetSSPlayerInfoAsync();
@@ -225,7 +221,7 @@ namespace PlayerInfoViewer.Models
             config.LastFullComboCount = allOverallStatsData.fullComboCount;
             config.LastTimePlayed = allOverallStatsData.timePlayed;
             config.LastHandDistanceTravelled = allOverallStatsData.handDistanceTravelled;
-            config.LastHeadDistanceTravelled = this._hdtData.HeadDistanceTravelled;
+            config.TodayHeadDistanceTravelled = 0;
         }
     }
 }

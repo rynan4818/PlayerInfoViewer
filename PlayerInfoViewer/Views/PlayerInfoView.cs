@@ -23,7 +23,6 @@ namespace PlayerInfoViewer.Views
         private ScoreSaberPlayerInfo _scoreSaberPlayerInfo;
         private BeatLeaderPlayerInfo _beatLeaderPlayerInfo;
         private ScoreSaberRanking _rankingData;
-        private HDTDataJson _hdtDataJson;
         public GameObject rootObject;
         private Canvas _canvas;
         private CurvedTextMeshPro _playerStatistics;
@@ -47,13 +46,11 @@ namespace PlayerInfoViewer.Views
             PlayerDataModel playerDataModel,
             ScoreSaberPlayerInfo scoreSaberPlayerInfo,
             BeatLeaderPlayerInfo beatLeaderPlayerInfo,
-            HDTDataJson hdtDataJson,
             ScoreSaberRanking rankingData)
         {
             this._playerDataManager = playerDataManager;
             this._platformLeaderboardViewController = platformLeaderboardViewController;
             this._playerDataModel = playerDataModel;
-            this._hdtDataJson = hdtDataJson;
             this._rankingData = rankingData;
             this._scoreSaberPlayerInfo = scoreSaberPlayerInfo;
             this._beatLeaderPlayerInfo = beatLeaderPlayerInfo;
@@ -106,6 +103,7 @@ namespace PlayerInfoViewer.Views
             this._platformLeaderboardViewController.didActivateEvent += this.OnLeaderboardActivated;
             this._platformLeaderboardViewController.didDeactivateEvent += this.OnLeaderboardDeactivated;
             CO2CoreManagerPatch.OnCO2Changed += this.OnCO2Changed;
+            HeadDistanceTravelledControllerPatch.OnHDTUpdate += this.OnHDTUpdate;
             CustomLeaderboardShowPatch.OnCustomLeaderboardShowed += this.OnCustomLeaderboardShowed;
             CustomLeaderboardHidePatch.OnCustomLeaderboardHidden += this.OnCustomLeaderboardHidden;
             UploadPlayRequestPatch.OnUploadPlayFinished += this.OnBLScoreUploaded;
@@ -118,6 +116,7 @@ namespace PlayerInfoViewer.Views
             this._platformLeaderboardViewController.didDeactivateEvent -= this.OnLeaderboardDeactivated;
             this._platformLeaderboardViewController.didActivateEvent -= this.OnLeaderboardActivated;
             CO2CoreManagerPatch.OnCO2Changed -= this.OnCO2Changed;
+            HeadDistanceTravelledControllerPatch.OnHDTUpdate -= this.OnHDTUpdate;
             CustomLeaderboardShowPatch.OnCustomLeaderboardShowed -= this.OnCustomLeaderboardShowed;
             CustomLeaderboardHidePatch.OnCustomLeaderboardHidden -= this.OnCustomLeaderboardHidden;
             UploadPlayRequestPatch.OnUploadPlayFinished -= this.OnBLScoreUploaded;
@@ -149,14 +148,14 @@ namespace PlayerInfoViewer.Views
             gameObj.SetActive(true);
             return textMesh;
         }
-        public void PlyerStatisticsChange()
+        public void OnPlyerStatisticsChange(bool change = false)
         {
             if (this._playerDataManager._userID == null)
                 return;
             if (!PluginConfig.Instance.ViewPlayerStatistics || !this._playerDataManager._initFinish)
                 return;
             var allOverallStatsData = this._playerDataModel.playerData.playerAllOverallStatsData.allOverallStatsData;
-            if (this.lastPlayed == allOverallStatsData.playedLevelsCount)
+            if (!change && this.lastPlayed == allOverallStatsData.playedLevelsCount)
                 return;
             this.lastPlayed = allOverallStatsData.playedLevelsCount;
             var userdata = PluginConfig.Instance.UserInfoDatas[this._playerDataManager._userID];
@@ -167,8 +166,8 @@ namespace PlayerInfoViewer.Views
             var todayTimePlayed = String.Format("{0:+0.#;-0.#;+0}", (allOverallStatsData.timePlayed - userdata.LastTimePlayed) / 60f);
             var todayHandDistanceTravelled = String.Format("{0:+0.#;-0.#;+0}", (float)(allOverallStatsData.handDistanceTravelled - userdata.LastHandDistanceTravelled) / 1000f);
             var todayHeadDistanceTravelled = "";
-            if (this._hdtDataJson.hdtEnable)
-                todayHeadDistanceTravelled = String.Format("  Head : {0:+0;-0;+0}m", this._hdtDataJson.HeadDistanceTravelled - userdata.LastHeadDistanceTravelled);
+            if (HeadDistanceTravelledControllerPatch.Enable)
+                todayHeadDistanceTravelled = String.Format("  Head : {0:+0;-0;+0}m", userdata.TodayHeadDistanceTravelled);
             this._playerStatistics.text = $"Play : {todayPlayed}  Clear : {todayCleared}  Fail : {todayFailed}  FC : {todayFullCombo}  Time : {todayTimePlayed}m  Hand : {todayHandDistanceTravelled}km{todayHeadDistanceTravelled}";
         }
         public void OnPlayCountChange()
@@ -343,6 +342,13 @@ namespace PlayerInfoViewer.Views
             this._tmp = co2data.Item3;
             this.OnRankPpChange();
         }
+        public void OnHDTUpdate(float hmdDistance)
+        {
+            if (this._playerDataManager._userID == null)
+                return;
+            PluginConfig.Instance.UserInfoDatas[this._playerDataManager._userID].TodayHeadDistanceTravelled += hmdDistance;
+            this.OnPlyerStatisticsChange(true);
+        }
         public void OnLeaderboardActivated(bool firstactivation, bool addedtohierarchy, bool screensystemenabling)
         {
             // async void警察に怒られないようにします(；・∀・) https://light11.hatenadiary.com/entry/2019/03/05/221311
@@ -357,8 +363,7 @@ namespace PlayerInfoViewer.Views
                 this.OnPlayCountChange();
                 this.OnRankPpChange();
             }
-            this._hdtDataJson.Load();
-            this.PlyerStatisticsChange();
+            this.OnPlyerStatisticsChange();
             if (!this._playerDataManager._initFinish)
                 return;
             if (!this._scoreSaberPlayerInfo._playerInfoGetActive && (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null))
