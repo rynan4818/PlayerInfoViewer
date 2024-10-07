@@ -45,23 +45,7 @@ namespace PlayerInfoViewer.Models
             if (this._initFinish || this._initActive)
                 return;
             this._initActive = true;
-            GetUserInfo.UpdateUserInfo();
-            //GetUserInfo.GetUserAsync()を使えばよいけど、BS1.29.1との互換性のためGetUserID()を使用する。
-            //GetUserID()は非推奨なので、1.29.1のサポートを外すときにGetUserAsync()に直す。
-            var token = connectionClosed.Token;
-            try
-            {
-                while (GetUserInfo.GetUserID() == null)
-                {
-                    token.ThrowIfCancellationRequested();
-                    await Task.Delay(10);
-                }
-            }
-            catch (Exception)
-            {
-                return;
-            }
-            this._userID = GetUserInfo.GetUserID();
+            this._userID = (await GetUserInfo.GetUserAsync()).platformUserId;
             if (!PluginConfig.Instance.UserInfoDatas.ContainsKey(this._userID))
                 PluginConfig.Instance.UserInfoDatas.Add(this._userID, new UserInfoData());
             Plugin.Log.Debug("PlayerDataManager Initialize");
