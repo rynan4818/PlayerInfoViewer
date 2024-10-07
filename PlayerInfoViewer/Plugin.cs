@@ -43,12 +43,21 @@ namespace PlayerInfoViewer
         public void OnApplicationStart()
         {
             Log.Info("OnApplicationStart");
+            MethodInfo patch;
             var orginal = AccessTools.Method("CO2Core.Models.CO2CoreManager:UpdateCO2");
-            var postfix = AccessTools.Method(typeof(CO2CoreManagerPatch), nameof(CO2CoreManagerPatch.UpdateCO2Postfix));
             if (orginal != null)
             {
+                patch = AccessTools.Method(typeof(CO2CoreManagerPatch), nameof(CO2CoreManagerPatch.UpdateCO2Postfix));
                 Log.Debug("CO2CoreManager Patch Load");
-                _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
+                _harmony.Patch(orginal, null, new HarmonyMethod(patch));
+            }
+            orginal = AccessTools.Method("HeadDistanceTravelled.HeadDistanceTravelledController:OnDestroy");
+            if (orginal != null)
+            {
+                patch = AccessTools.Method(typeof(HeadDistanceTravelledControllerPatch), nameof(HeadDistanceTravelledControllerPatch.OnDestroyPrefix));
+                Log.Debug("HeadDistanceTravelledController Patch Load");
+                _harmony.Patch(orginal, new HarmonyMethod(patch));
+                HeadDistanceTravelledControllerPatch.Enable = true;
             }
             var type = AccessTools.TypeByName("BeatLeader.API.Methods.UploadReplayRequest");
             if (type != null)
@@ -56,11 +65,11 @@ namespace PlayerInfoViewer
             if (type != null)
             {
                 orginal = AccessTools.Method(type, "ParseResponse");
-                postfix = AccessTools.Method(typeof(UploadReplayRequestPatch), nameof(UploadReplayRequestPatch.ParseResponsePostfix));
+                patch = AccessTools.Method(typeof(UploadReplayRequestPatch), nameof(UploadReplayRequestPatch.ParseResponsePostfix));
                 if (orginal != null)
                 {
                     Log.Debug("BeatLeader UploadReplayRequest Patch Load");
-                    _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
+                    _harmony.Patch(orginal, null, new HarmonyMethod(patch));
                 }
             }
             type = AccessTools.TypeByName("BeatLeader.API.Methods.UploadPlayRequest");
@@ -69,11 +78,11 @@ namespace PlayerInfoViewer
             if (type != null)
             {
                 orginal = AccessTools.Method(type, "ParseResponse");
-                postfix = AccessTools.Method(typeof(UploadPlayRequestPatch), nameof(UploadPlayRequestPatch.ParseResponsePostfix));
+                patch = AccessTools.Method(typeof(UploadPlayRequestPatch), nameof(UploadPlayRequestPatch.ParseResponsePostfix));
                 if (orginal != null)
                 {
                     Log.Debug("BeatLeader UploadPlayRequest Patch Load");
-                    _harmony.Patch(orginal, null, new HarmonyMethod(postfix));
+                    _harmony.Patch(orginal, null, new HarmonyMethod(patch));
                 }
             }
             leaderboardCore = PluginManager.GetPluginFromId("LeaderboardCore");

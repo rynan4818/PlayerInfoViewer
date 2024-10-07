@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\PluginConfig.cs" />
+    <Compile Include="HarmonyPatches\HeadDistanceTravelledControllerPatch.cs" />
     <Compile Include="HarmonyPatches\UploadPlayRequestPatch.cs" />
     <Compile Include="HarmonyPatches\UploadReplayRequestPatch.cs" />
     <Compile Include="HarmonyPatches\CO2CoreManagerPatch.cs" />
@@ -159,7 +160,6 @@
     <Compile Include="Installers\PlayerInfoMenuInstaller.cs" />
     <Compile Include="Models\BeatLeaderPlayerInfo.cs" />
     <Compile Include="Models\BeatLeader\PlayerResponseFullJson.cs" />
-    <Compile Include="Models\HDTDataJson.cs" />
     <Compile Include="Models\PlayerDataManager.cs" />
     <Compile Include="Models\ScoreSaberPlayerInfo.cs" />
     <Compile Include="Models\ScoreSaberRanking.cs" />
