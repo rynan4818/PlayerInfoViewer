@@ -67,7 +67,7 @@ namespace PlayerInfoViewer.Configuration
         public virtual int LastFullComboCount { get; set; } = 0;
         public virtual float LastTimePlayed { get; set; } = 0;
         public virtual int LastHandDistanceTravelled { get; set; } = 0;
-        public virtual float LastHeadDistanceTravelled { get; set; } = 0;
+        public virtual float TodayHeadDistanceTravelled { get; set; } = 0;
         public virtual float BeforePP { get; set; } = 0;
         public virtual float NowPP { get; set; } = 0;
         public virtual bool LastBLPlayerInfoNoGet { get; set; } = false;  //前回記録のBeatLeader記録が取得できなかったとき
