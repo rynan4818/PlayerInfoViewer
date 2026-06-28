@@ -85,6 +85,17 @@ namespace PlayerInfoViewer
                     _harmony.Patch(orginal, null, new HarmonyMethod(patch));
                 }
             }
+            type = AccessTools.TypeByName("ScoreSaber.Features.Leaderboards.UI.PanelView");
+            if (type != null)
+            {
+                orginal = AccessTools.Method(type, "SetPrompt", new[] { typeof(string), typeof(bool), typeof(float) });
+                patch = AccessTools.Method(typeof(ScoreSaberPanelViewSetPromptPatch), nameof(ScoreSaberPanelViewSetPromptPatch.Postfix));
+                if (orginal != null)
+                {
+                    Log.Debug("ScoreSaber PanelView SetPrompt Patch Load");
+                    _harmony.Patch(orginal, null, new HarmonyMethod(patch));
+                }
+            }
             leaderboardCore = PluginManager.GetPluginFromId("LeaderboardCore");
             if (leaderboardCore == null)
                 leaderboardCore = PluginManager.GetDisabledPluginFromId("LeaderboardCore");

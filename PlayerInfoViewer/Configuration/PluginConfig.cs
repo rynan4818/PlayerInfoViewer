@@ -16,6 +16,7 @@ namespace PlayerInfoViewer.Configuration
         public virtual bool ViewPlayCount { get; set; } = true;
         public virtual bool ViewRankPP { get; set; } = true;
         public virtual bool ViewPlayerStatistics { get; set; } = true;
+        public virtual int ScoreSaberUpdateDelaySeconds { get; set; } = 5;
         public virtual float ViewFontSize { get; set; } = 12f;
         public virtual float ViewYoffset { get; set; } = 0;
         [UseConverter(typeof(DictionaryConverter<UserInfoData>))]
