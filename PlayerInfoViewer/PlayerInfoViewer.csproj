@@ -148,6 +148,7 @@
     <Compile Include="HarmonyPatches\HeadDistanceTravelledControllerPatch.cs" />
     <Compile Include="HarmonyPatches\UploadPlayRequestPatch.cs" />
     <Compile Include="HarmonyPatches\UploadReplayRequestPatch.cs" />
+    <Compile Include="HarmonyPatches\ScoreSaberPanelViewSetPromptPatch.cs" />
     <Compile Include="HarmonyPatches\CO2CoreManagerPatch.cs" />
     <Compile Include="HarmonyPatches\CustomLeaderboardHidePatch.cs" />
     <Compile Include="HarmonyPatches\CustomLeaderboardShowPatch.cs" />

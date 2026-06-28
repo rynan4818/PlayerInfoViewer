@@ -53,6 +53,12 @@ namespace PlayerInfoViewer.Views
             get => PluginConfig.Instance.ViewPlayerStatistics;
             set => PluginConfig.Instance.ViewPlayerStatistics = value;
         }
+        [UIValue("ScoreSaberUpdateDelaySeconds")]
+        public int ScoreSaberUpdateDelaySeconds
+        {
+            get => PluginConfig.Instance.ScoreSaberUpdateDelaySeconds;
+            set => PluginConfig.Instance.ScoreSaberUpdateDelaySeconds = value;
+        }
         [UIValue("ViewFontSize")]
         public int ViewFontSize
         {
@@ -69,6 +75,11 @@ namespace PlayerInfoViewer.Views
         private string TimeFormatter(int value)
         {
             return $"{value.ToString("F0", CultureInfo.InvariantCulture)} hour";
+        }
+        [UIAction("SecondFormatter")]
+        private string SecondFormatter(int value)
+        {
+            return $"{value.ToString("F0", CultureInfo.InvariantCulture)} sec";
         }
     }
 }

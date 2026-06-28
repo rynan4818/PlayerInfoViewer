@@ -7,6 +7,7 @@
     <bool-setting text='Rank PP' value='ViewRankPP'></bool-setting>
     <bool-setting text='Play Count' value='ViewPlayCount'></bool-setting>
     <bool-setting text='Player Statistics' value='ViewPlayerStatistics'></bool-setting>
+    <increment-setting text="ScoreSaber Update Delay" value="ScoreSaberUpdateDelaySeconds" increment="1" min="0" integer-only="true" formatter="SecondFormatter" apply-on-change="true"></increment-setting>
     <increment-setting text="Font Size" value="ViewFontSize" increment="1" min="1" integer-only="true" apply-on-change="true"></increment-setting>
     <increment-setting text="Y Offset" value="ViewYoffset" increment="0.1" apply-on-change="true"></increment-setting>
   </settings-container>
