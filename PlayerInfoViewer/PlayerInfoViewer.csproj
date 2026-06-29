@@ -160,6 +160,7 @@
     <Compile Include="Models\ScoreSaberPlayerInfo.cs" />
     <Compile Include="Models\ScoreSaberRanking.cs" />
     <Compile Include="Models\ScoreSaber\PlayerFullInfoJson.cs" />
+    <Compile Include="Models\ScoreSaber\PlayerFullInfoV2Json.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HttpUtility.cs" />
