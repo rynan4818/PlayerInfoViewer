@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace PlayerInfoViewer.Views
 {
@@ -33,6 +34,10 @@ namespace PlayerInfoViewer.Views
         public double _hum;
         public double _tmp;
         public bool _beatLeaderBoardEnabled = false;
+        private readonly object _scoreSaberRefreshSync = new object();
+        private CancellationTokenSource _scoreSaberRefreshCancellationTokenSource;
+        private bool _scoreSaberRefreshInProgress;
+        private bool _scoreSaberRefreshQueuedAfterCurrent;
 
         public static readonly Vector2 CanvasSize = new Vector2(100, 50);
         public static readonly Vector3 Scale = new Vector3(0.01f, 0.01f, 0.01f);
@@ -108,6 +113,7 @@ namespace PlayerInfoViewer.Views
             CustomLeaderboardHidePatch.OnCustomLeaderboardHidden += this.OnCustomLeaderboardHidden;
             UploadPlayRequestPatch.OnUploadPlayFinished += this.OnBLScoreUploaded;
             UploadReplayRequestPatch.OnUploadReplayFinished += this.OnBLScoreUploaded;
+            ScoreSaberPanelViewSetPromptPatch.OnScoreUploaded += this.OnScoreUploaded;
             this.rootObject.SetActive(false);
         }
         private void OnDestroy()
@@ -121,6 +127,13 @@ namespace PlayerInfoViewer.Views
             CustomLeaderboardHidePatch.OnCustomLeaderboardHidden -= this.OnCustomLeaderboardHidden;
             UploadPlayRequestPatch.OnUploadPlayFinished -= this.OnBLScoreUploaded;
             UploadReplayRequestPatch.OnUploadReplayFinished -= this.OnBLScoreUploaded;
+            ScoreSaberPanelViewSetPromptPatch.OnScoreUploaded -= this.OnScoreUploaded;
+            lock (this._scoreSaberRefreshSync)
+            {
+                this._scoreSaberRefreshCancellationTokenSource?.Cancel();
+                this._scoreSaberRefreshCancellationTokenSource?.Dispose();
+                this._scoreSaberRefreshCancellationTokenSource = null;
+            }
             Destroy(this.rootObject);
         }
         private CurvedTextMeshPro CreateText(RectTransform parent, string text, Vector2 anchoredPosition)
@@ -367,7 +380,7 @@ namespace PlayerInfoViewer.Views
             if (!this._playerDataManager._initFinish)
                 return;
             if (!this._scoreSaberPlayerInfo._playerInfoGetActive && (this._scoreSaberPlayerInfo._playerFullInfo == null || this._scoreSaberPlayerInfo._playerFullInfo.id == null))
-                this.OnScoreUploaded();
+                this.ScheduleScoreSaberRefresh(false);
             if (!this._beatLeaderPlayerInfo._playerInfoGetActive && (this._beatLeaderPlayerInfo._playerInfo == null || this._beatLeaderPlayerInfo._playerInfo.id == null))
                 this.OnBLScoreUploaded();
         }
@@ -379,9 +392,71 @@ namespace PlayerInfoViewer.Views
         {
             if (!this._playerDataManager._initFinish)
                 return;
-            _ = this.ScoreUploadedAsync();
+            this.ScheduleScoreSaberRefresh(true);
         }
-        public async Task ScoreUploadedAsync()
+        private void ScheduleScoreSaberRefresh(bool useDelay)
+        {
+            CancellationTokenSource cancellationTokenSource;
+            var delayMilliseconds = useDelay ? Math.Max(0, PluginConfig.Instance.ScoreSaberUpdateDelaySeconds) * 1000 : 0;
+
+            lock (this._scoreSaberRefreshSync)
+            {
+                if (this._scoreSaberRefreshInProgress)
+                {
+                    this._scoreSaberRefreshQueuedAfterCurrent = true;
+                    return;
+                }
+
+                this._scoreSaberRefreshCancellationTokenSource?.Cancel();
+                this._scoreSaberRefreshCancellationTokenSource?.Dispose();
+                this._scoreSaberRefreshCancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource = this._scoreSaberRefreshCancellationTokenSource;
+            }
+
+            _ = this.RunScheduledScoreSaberRefreshAsync(delayMilliseconds, cancellationTokenSource);
+        }
+        private async Task RunScheduledScoreSaberRefreshAsync(int delayMilliseconds, CancellationTokenSource cancellationTokenSource)
+        {
+            try
+            {
+                if (delayMilliseconds > 0)
+                    await Task.Delay(delayMilliseconds, cancellationTokenSource.Token);
+
+                while (true)
+                {
+                    lock (this._scoreSaberRefreshSync)
+                    {
+                        this._scoreSaberRefreshInProgress = true;
+                        this._scoreSaberRefreshQueuedAfterCurrent = false;
+                    }
+
+                    await this.ScoreUploadedAsync();
+
+                    lock (this._scoreSaberRefreshSync)
+                    {
+                        this._scoreSaberRefreshInProgress = false;
+                        if (!this._scoreSaberRefreshQueuedAfterCurrent)
+                        {
+                            if (ReferenceEquals(this._scoreSaberRefreshCancellationTokenSource, cancellationTokenSource))
+                                this._scoreSaberRefreshCancellationTokenSource = null;
+                            return;
+                        }
+                    }
+
+                    delayMilliseconds = Math.Max(0, PluginConfig.Instance.ScoreSaberUpdateDelaySeconds) * 1000;
+                    if (delayMilliseconds > 0)
+                        await Task.Delay(delayMilliseconds, cancellationTokenSource.Token);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            finally
+            {
+                cancellationTokenSource.Dispose();
+            }
+        }
+        private async Task ScoreUploadedAsync()
         {
             await this._playerDataManager.GetSSPlayerInfoAsync();
             await this._rankingData.GetUserRankingAsync(this._playerDataManager._userID);
