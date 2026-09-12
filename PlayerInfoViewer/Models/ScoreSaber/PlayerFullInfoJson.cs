@@ -3,10 +3,10 @@
     public class PlayerFullInfoJson
     {
         public string id { get; set; }
-        //public string name { get; set; }
+        public string name { get; set; }
         //public string profilePicture { get; set; }
         //public string bio { get; set; }
-        //public string country { get; set; }
+        public string country { get; set; }
         public float pp { get; set; }
         public int rank { get; set; }
         public int countryRank { get; set; }
