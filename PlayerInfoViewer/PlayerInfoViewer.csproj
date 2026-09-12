@@ -158,6 +158,7 @@
     <Compile Include="HarmonyPatches\HeadDistanceTravelledControllerPatch.cs" />
     <Compile Include="HarmonyPatches\UploadPlayRequestPatch.cs" />
     <Compile Include="HarmonyPatches\UploadReplayRequestPatch.cs" />
+    <Compile Include="HarmonyPatches\ScoreSaberPanelViewSetPromptPatch.cs" />
     <Compile Include="HarmonyPatches\CO2CoreManagerPatch.cs" />
     <Compile Include="HarmonyPatches\CustomLeaderboardHidePatch.cs" />
     <Compile Include="HarmonyPatches\CustomLeaderboardShowPatch.cs" />
@@ -169,6 +170,7 @@
     <Compile Include="Models\ScoreSaberPlayerInfo.cs" />
     <Compile Include="Models\ScoreSaberRanking.cs" />
     <Compile Include="Models\ScoreSaber\PlayerFullInfoJson.cs" />
+    <Compile Include="Models\ScoreSaber\PlayerFullInfoV2Json.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HttpUtility.cs" />
